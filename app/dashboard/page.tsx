@@ -3,7 +3,7 @@ import { requireUser, getCurrentProfile } from "@/lib/auth/session";
 
 const blocks = [
   "Patient records and demographics",
-  "Appointment-linked notes",
+  "Session-linked notes",
   "AI screening drafts and red-flag prompts",
   "Transcription and clinical document drafting",
 ];

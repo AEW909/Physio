@@ -1,0 +1,40 @@
+export type PatientListItem = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string | null;
+  email: string | null;
+  phone: string | null;
+  created_at: string;
+  is_archived: boolean;
+  archived_at: string | null;
+};
+
+export type PatientDetail = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  gp_name: string | null;
+  gp_contact: string | null;
+  consent_status: string | null;
+  drug_history: string | null;
+  uses_steroids: boolean;
+  uses_anticoagulants: boolean;
+  past_medical_history: string[] | null;
+  past_medical_history_details: string | null;
+  past_operations: string | null;
+  is_archived: boolean;
+  archived_at: string | null;
+  archived_by: string | null;
+  deletion_requested_at: string | null;
+  deletion_reason: string | null;
+  erased_at: string | null;
+  created_at: string;
+  updated_at: string;
+};

@@ -4,7 +4,7 @@ const milestones = [
   {
     title: "Clinical records first",
     description:
-      "Patient records, appointments, and note ownership are the foundation. AI sits inside this workflow rather than defining it.",
+      "Patient records, sessions, and note ownership are the foundation. AI sits inside this workflow rather than defining it.",
   },
   {
     title: "Server-side AI boundaries",
@@ -45,7 +45,7 @@ export default function HomePage() {
           <h2>Current build priorities</h2>
           <ul className="panel-list">
             <li>Auth and staff roles</li>
-            <li>Patient records and appointments</li>
+            <li>Patient records and sessions</li>
             <li>Clinical notes with versioning</li>
             <li>AI screening and note drafting</li>
           </ul>

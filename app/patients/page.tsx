@@ -1,9 +1,22 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { ArchiveToggleForm } from "@/components/patients/archive-toggle-form";
+import { PatientList } from "@/components/patients/patient-list";
+import { PatientSearch } from "@/components/patients/patient-search";
 import { getCurrentProfile, requireRole } from "@/lib/auth/session";
+import { listPatients } from "@/lib/patients/queries";
+import Link from "next/link";
 
-export default async function PatientsPage() {
+type PatientsPageProps = {
+  searchParams: Promise<{ search?: string; status?: string }>;
+};
+
+export default async function PatientsPage({ searchParams }: PatientsPageProps) {
   await requireRole(["owner", "clinician", "admin"]);
   const profile = await getCurrentProfile();
+  const params = await searchParams;
+  const search = params.search?.trim() ?? "";
+  const status = params.status === "archived" ? "archived" : "active";
+  const patients = await listPatients(search, status);
 
   if (!profile) {
     throw new Error("Authenticated profile not found.");
@@ -12,18 +25,24 @@ export default async function PatientsPage() {
   return (
     <AppShell
       title="Patients"
-      description="This secured module will become the patient directory and patient detail workspace."
+      description="Search and manage patient records. Registration and updates live here, separate from appointment-level clinical notes."
       profile={profile}
     >
-      <section className="card stack">
-        <h2>Planned V1 capabilities</h2>
-        <ul className="panel-list">
-          <li>Create and search patient records</li>
-          <li>Store demographics and contact information</li>
-          <li>Attach appointments, screenings, notes, and documents</li>
-          <li>Enforce role-aware access through Supabase RLS</li>
-        </ul>
-      </section>
+      <div className="workspace-actions workspace-actions-spread">
+        <PatientSearch initialQuery={search} />
+        <div className="workspace-actions">
+          <Link
+            className="button button-secondary"
+            href={status === "archived" ? "/patients" : "/patients?status=archived"}
+          >
+            {status === "archived" ? "View active patients" : "View archived patients"}
+          </Link>
+          <Link className="button button-primary" href="/patients/new">
+            Add patient
+          </Link>
+        </div>
+      </div>
+      <PatientList patients={patients} searchTerm={search} status={status} />
     </AppShell>
   );
 }
