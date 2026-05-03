@@ -1,61 +1,52 @@
-# PhysioFlow AI Assistant
+# Physio
 
-A lightweight browser-based prototype for a physiotherapy practice that supports:
+Physio is being rebuilt as a production-oriented physiotherapy platform with secure clinical records, appointment-linked notes, and server-side AI assistance.
 
-- AI-powered patient pre-assessment screening
-- AI-assisted SOAP note creation from rough text or voice
-- AI medical note writing for assessments, reviews, discharge notes, and referral letters
+## Current Status
 
-## What It Includes
+- The original browser-only prototype has been archived under `archive/prototype-v1/`
+- Active development is now focused on the new `Next.js + Supabase + Vercel` application scaffold
+- The repo currently contains planning docs, a fresh app shell, and a first-pass Supabase schema draft
 
-- A patient intake workflow that captures symptoms, history, goals, and risk context
-- AI-generated triage summary with red flags, follow-up questions, and a subjective-note draft
-- Live browser dictation where supported
-- Audio recording with OpenAI transcription support
-- Editable SOAP notes and patient-friendly summaries
-- Draft clinical documentation with a built-in review checklist
+## Target Stack
 
-## Files
+- `Next.js` with the App Router
+- `Vercel` for deployment and runtime environment variables
+- `Supabase` for Postgres, Auth, Storage, and Row Level Security
+- `OpenAI` through server-side routes only
 
-- `index.html` - main single-page application
-- `styles.css` - UI styling
-- `app.js` - browser logic, voice features, and OpenAI API calls
+## Non-Negotiable Rules
 
-## How To Use
+- No direct browser-side AI API calls
+- No production secrets in client code
+- AI screening lives inside the clinical records workflow
+- Patient data access must be role-aware and auditable
+- GDPR-aware architecture is foundational, not a later add-on
 
-1. Open `index.html` in a modern browser.
-2. Add your OpenAI API key in the session setup card.
-3. Complete the patient pre-assessment fields.
-4. Generate the AI screening summary.
-5. Dictate notes live, or record and transcribe audio.
-6. Generate an editable SOAP note or a longer clinical document.
+## Repo Layout
 
-## Important Prototype Notes
+- `app/` - new application shell
+- `archive/prototype-v1/` - archived proof-of-concept files
+- `docs/` - planning, architecture, data model, and compliance notes
+- `lib/` - shared environment and Supabase helpers
+- `supabase/` - schema and migration drafts
 
-- The API key is stored in `sessionStorage`, so it is not persisted after the browser session ends.
-- This prototype calls the OpenAI API directly from the browser for simplicity.
-- For production use, move the API calls to a secure backend you control.
-- All AI output must be reviewed by a qualified clinician before use in records or clinical decisions.
+## Environment Variables
 
-## Voice Features
+Copy `.env.example` to `.env.local` and provide:
 
-- Live dictation uses the browser Speech Recognition API, which is supported unevenly across browsers.
-- Audio recording uses `MediaRecorder`.
-- OpenAI transcription uses the `/v1/audio/transcriptions` endpoint with `gpt-4o-mini-transcribe`.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `OPENAI_API_KEY`
 
-## OpenAI References
+`NEXT_PUBLIC_*` values are browser-safe. Everything else is server-only.
 
-These official docs informed the API choices used in this prototype:
+## Next Development Steps
 
-- [Responses API](https://platform.openai.com/docs/api-reference/responses/create?api-mode=responses)
-- [Text generation guide](https://platform.openai.com/docs/guides/text)
-- [Speech to text guide](https://platform.openai.com/docs/guides/speech-to-text)
-
-## Suggested Next Step
-
-If you want this to become clinic-ready, the next phase should be:
-
-1. Add a secure backend to keep the API key off the client.
-2. Save patient records into your practice management workflow.
-3. Add structured templates for initial assessment, follow-up, discharge, and exercise prescription.
-4. Add authentication, audit logs, and consent/privacy controls.
+1. Install dependencies
+2. Create the Supabase project in a UK or EU region
+3. Apply and refine the schema
+4. Build auth and staff roles
+5. Build patient records and appointments
+6. Add notes, screening, and transcription modules
