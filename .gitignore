@@ -10,4 +10,5 @@ coverage/
 .env.test.local
 .env.production.local
 .supabase/
+supabase/.temp/
 tsconfig.tsbuildinfo
