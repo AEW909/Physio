@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhysioFlow AI Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Physiotherapy Practice Assistant</p>
+        <h1>AI-powered screening, dictation, and clinical note drafting for your clinic.</h1>
+        <p class="hero-text">Capture patient information before appointments, turn voice into editable notes, and draft structured clinical documentation in seconds.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#screening">Start Screening Workflow</a>
+          <a class="button button-secondary" href="#notes">Open Notes Workspace</a>
+        </div>
+      </div>
+      <aside class="setup-card">
+        <h2>Session Setup</h2>
+        <label>Practice name<input id="practiceName" type="text" placeholder="Lancaster Physio Clinic"></label>
+        <label>OpenAI API key<input id="apiKey" type="password" placeholder="sk-..."></label>
+        <label>AI model<input id="model" type="text" value="gpt-5"></label>
+        <button id="saveSettings" class="button button-primary full-width">Save Session Settings</button>
+        <p class="microcopy">The API key stays in your browser session only. For production use, move API calls behind your own secure backend.</p>
+      </aside>
+    </header>
+
+    <main class="main-grid">
+      <section id="screening" class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">1. Patient Pre-Assessment</p>
+            <h2>AI screening intake</h2>
+          </div>
+          <button id="generateScreening" class="button button-primary">Generate AI Screening Summary</button>
+        </div>
+
+        <div class="form-grid">
+          <label>Patient name<input id="patientName" type="text" placeholder="Alex Taylor"></label>
+          <label>Date of birth<input id="patientDob" type="date"></label>
+          <label>Occupation / sport<input id="patientActivity" type="text" placeholder="Teacher, distance runner"></label>
+          <label>Primary problem area<input id="problemArea" type="text" placeholder="Lower back, knee, shoulder"></label>
+          <label class="full-span">Main reason for seeking treatment<textarea id="mainConcern" rows="3" placeholder="Describe the issue in the patient's own words."></textarea></label>
+          <label class="full-span">Symptoms, pain pattern, and irritability<textarea id="symptoms" rows="4" placeholder="Pain quality, severity, aggravating/easing factors, stiffness, numbness, weakness, night pain, etc."></textarea></label>
+          <label class="full-span">Relevant history and current medications<textarea id="history" rows="4" placeholder="Past injuries, surgeries, investigations, relevant medical history, medication, falls, osteoporosis, cancer history, inflammatory disease, anticoagulants, etc."></textarea></label>
+          <label class="full-span">Goals and functional limitations<textarea id="goals" rows="4" placeholder="What can the patient not currently do, and what do they want to return to?"></textarea></label>
+        </div>
+
+        <div class="output-grid">
+          <article class="output-card">
+            <div class="output-header">
+              <h3>AI triage snapshot</h3>
+              <span id="triageBadge" class="badge badge-neutral">Awaiting input</span>
+            </div>
+            <textarea id="screeningSummary" rows="12" placeholder="AI-generated screening summary will appear here."></textarea>
+          </article>
+          <article class="output-card">
+            <div class="output-header">
+              <h3>Red flags and follow-up prompts</h3>
+              <span class="badge badge-soft">Clinician review required</span>
+            </div>
+            <textarea id="screeningFlags" rows="12" placeholder="Potential risks, missing questions, and admin prompts will appear here."></textarea>
+          </article>
+        </div>
+      </section>
+
+      <section id="notes" class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">2. Voice and Text Notes</p>
+            <h2>AI note creation</h2>
+          </div>
+          <div class="action-group">
+            <button id="toggleDictation" class="button button-secondary">Start Live Dictation</button>
+            <button id="transcribeRecording" class="button button-secondary">Transcribe Recording</button>
+            <button id="generateSoap" class="button button-primary">Create SOAP Note</button>
+          </div>
+        </div>
+
+        <div class="voice-tools">
+          <div class="voice-card">
+            <p class="tool-label">Live microphone capture</p>
+            <p id="dictationStatus">Idle. Use live dictation in supported browsers, or record audio below.</p>
+          </div>
+          <div class="voice-card">
+            <p class="tool-label">Audio recording</p>
+            <div class="action-group">
+              <button id="recordAudio" class="button button-secondary">Start Recording</button>
+              <button id="stopAudio" class="button button-secondary">Stop Recording</button>
+            </div>
+            <audio id="audioPlayback" controls></audio>
+          </div>
+        </div>
+
+        <label>Raw transcript / session notes<textarea id="rawTranscript" rows="12" placeholder="Paste rough notes here, dictate live, or transcribe a recording."></textarea></label>
+
+        <div class="output-grid">
+          <article class="output-card">
+            <div class="output-header">
+              <h3>Editable SOAP note</h3>
+              <span class="badge badge-soft">Draft</span>
+            </div>
+            <textarea id="soapNote" rows="14" placeholder="SOAP note draft will appear here."></textarea>
+          </article>
+          <article class="output-card">
+            <div class="output-header">
+              <h3>Patient-friendly summary</h3>
+              <span class="badge badge-soft">Optional handout</span>
+            </div>
+            <textarea id="patientSummary" rows="14" placeholder="A plain-English summary can be generated alongside the SOAP note."></textarea>
+          </article>
+        </div>
+      </section>
+
+      <section id="medical-writer" class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">3. Clinical Documentation</p>
+            <h2>AI medical note writer</h2>
+          </div>
+          <div class="action-group">
+            <select id="documentType">
+              <option value="Initial assessment">Initial assessment</option>
+              <option value="Follow-up review">Follow-up review</option>
+              <option value="Discharge summary">Discharge summary</option>
+              <option value="GP / consultant letter">GP / consultant letter</option>
+            </select>
+            <button id="generateMedicalNote" class="button button-primary">Draft Clinical Document</button>
+          </div>
+        </div>
+
+        <label>Additional clinical instructions or findings<textarea id="medicalPrompt" rows="8" placeholder="Add objective findings, special tests, exercise advice, response to treatment, imaging references, or any wording preferences."></textarea></label>
+
+        <div class="output-grid">
+          <article class="output-card">
+            <div class="output-header">
+              <h3>Clinical document draft</h3>
+              <span class="badge badge-soft">Editable</span>
+            </div>
+            <textarea id="medicalNote" rows="16" placeholder="Your AI-generated document will appear here."></textarea>
+          </article>
+          <article class="output-card">
+            <div class="output-header">
+              <h3>Review checklist</h3>
+              <span class="badge badge-soft">Safety</span>
+            </div>
+            <textarea id="medicalChecklist" rows="16" placeholder="The assistant will list assumptions, follow-up questions, and details to verify before finalising the note."></textarea>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>This prototype is designed to accelerate clinician workflows, not replace clinical judgment. Every output should be reviewed and edited by a qualified professional.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
