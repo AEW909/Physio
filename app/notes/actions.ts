@@ -155,7 +155,9 @@ const updateNoteSchema = z.object({
   noteId: z.string().uuid(),
   noteType: z.enum(["initial_assessment", "follow_up", "discharge"]),
   treatmentPlanId: z.string().uuid().optional(),
-  submitIntent: z.enum(["save", "save_and_discharge", "save_and_generate_plan_summaries"]).default("save"),
+  submitIntent: z
+    .enum(["save_draft", "complete_note", "complete_and_discharge", "complete_and_generate_plan_summaries"])
+    .default("complete_note"),
 });
 
 const generateFollowUpSupportSchema = z.object({
@@ -319,6 +321,7 @@ export async function updateNoteAction(
     .from("clinical_notes")
     .update({
       current_version_id: versionData.id,
+      status: parsed.data.submitIntent === "save_draft" ? "draft" : "final",
       updated_at: new Date().toISOString(),
     })
     .eq("id", parsed.data.noteId);
@@ -360,7 +363,10 @@ export async function updateNoteAction(
     }
   }
 
-  if (parsed.data.noteType === "initial_assessment" && parsed.data.submitIntent === "save_and_generate_plan_summaries") {
+  if (
+    parsed.data.noteType === "initial_assessment" &&
+    parsed.data.submitIntent === "complete_and_generate_plan_summaries"
+  ) {
     if (!noteData.treatment_plan_id) {
       return { error: "Treatment plan context is missing for AI summary generation." };
     }
@@ -432,7 +438,7 @@ export async function updateNoteAction(
     }
   }
 
-  if (parsed.data.noteType === "follow_up" && parsed.data.submitIntent === "save_and_discharge") {
+  if (parsed.data.noteType === "follow_up" && parsed.data.submitIntent === "complete_and_discharge") {
     if (!noteData.treatment_plan_id) {
       return { error: "Treatment plan context is missing for discharge." };
     }
@@ -526,13 +532,18 @@ export async function updateNoteAction(
     redirect(`/notes/${dischargeNoteData.id}`);
   }
 
+  if (parsed.data.submitIntent === "save_draft") {
+    revalidatePath(`/notes/${parsed.data.noteId}`);
+    return { success: "Draft saved." };
+  }
+
   if (parsed.data.treatmentPlanId) {
     revalidatePath(`/treatment-plans/${parsed.data.treatmentPlanId}`);
     redirect(`/treatment-plans/${parsed.data.treatmentPlanId}`);
   }
 
   revalidatePath(`/notes/${parsed.data.noteId}`);
-  return { success: "Session note saved." };
+  return { success: "Note completed." };
 }
 
 function asRecord(value: unknown) {

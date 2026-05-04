@@ -195,6 +195,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
   const [isDirty, setIsDirty] = useState(false);
   const [pendingNavigationHref, setPendingNavigationHref] = useState<string | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
+  const [pendingIntent, setPendingIntent] = useState<string | null>(null);
   const isSubmittingRef = useRef(false);
   const content = asRecord(note.current_version?.content ?? {});
   const history = asRecord(content.history);
@@ -256,6 +257,10 @@ export function NoteView({ note, patient }: NoteViewProps) {
     setPendingNavigationHref(null);
   }
 
+  function handleIntentClick(intent: string) {
+    setPendingIntent(intent);
+  }
+
   function stayOnPage() {
     setPendingNavigationHref(null);
   }
@@ -278,6 +283,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
   useEffect(() => {
     if (!pending) {
       isSubmittingRef.current = false;
+      setPendingIntent(null);
     }
   }, [pending]);
 
@@ -366,18 +372,38 @@ export function NoteView({ note, patient }: NoteViewProps) {
 
         {note.note_type !== "initial_assessment" ? (
           <div className="workspace-actions">
-            <button className="button button-primary" disabled={pending} name="submitIntent" type="submit" value="save">
-              {pending ? "Saving note..." : "Save note"}
+            <button
+              className="button button-secondary"
+              disabled={pending}
+              name="submitIntent"
+              onClick={() => handleIntentClick("save_draft")}
+              type="submit"
+              value="save_draft"
+            >
+              {pending && pendingIntent === "save_draft" ? "Saving draft..." : "Save draft"}
+            </button>
+            <button
+              className="button button-primary"
+              disabled={pending}
+              name="submitIntent"
+              onClick={() => handleIntentClick("complete_note")}
+              type="submit"
+              value="complete_note"
+            >
+              {pending && pendingIntent === "complete_note" ? "Completing note..." : "Complete note"}
             </button>
             {note.note_type === "follow_up" ? (
               <button
                 className="button button-management"
                 disabled={pending}
                 name="submitIntent"
+                onClick={() => handleIntentClick("complete_and_discharge")}
                 type="submit"
-                value="save_and_discharge"
+                value="complete_and_discharge"
               >
-                {pending ? "Saving + preparing discharge..." : "Save + Discharge patient"}
+                {pending && pendingIntent === "complete_and_discharge"
+                  ? "Completing + preparing discharge..."
+                  : "Complete + Discharge patient"}
               </button>
             ) : null}
             {state.success ? <p className="form-success">{state.success}</p> : null}
@@ -668,10 +694,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
                 defaultValue={asString(content.subjective_update)}
                 rows={4}
               />
-              <label className="field">
-                <span>NPRS</span>
-                <input defaultValue={asString(content.nprs)} name="nprs" type="text" />
-              </label>
+              <NprsSelect label="NPRS current" name="nprs" defaultValue={asString(content.nprs)} />
               <NoteTextarea
                 label="Response to previous treatment"
                 name="response_to_previous_treatment"
@@ -760,18 +783,38 @@ export function NoteView({ note, patient }: NoteViewProps) {
       ) : null}
 
         <div className="workspace-actions note-form-footer note-form-footer-sticky" id="note-actions">
-          <button className="button button-primary" disabled={pending} name="submitIntent" type="submit" value="save">
-            {pending ? "Saving note..." : "Save note"}
+          <button
+            className="button button-secondary"
+            disabled={pending}
+            name="submitIntent"
+            onClick={() => handleIntentClick("save_draft")}
+            type="submit"
+            value="save_draft"
+          >
+            {pending && pendingIntent === "save_draft" ? "Saving draft..." : "Save draft"}
+          </button>
+          <button
+            className="button button-primary"
+            disabled={pending}
+            name="submitIntent"
+            onClick={() => handleIntentClick("complete_note")}
+            type="submit"
+            value="complete_note"
+          >
+            {pending && pendingIntent === "complete_note" ? "Completing note..." : "Complete note"}
           </button>
           {note.note_type === "initial_assessment" ? (
             <button
-              className="button button-secondary"
+              className="button button-primary"
               disabled={pending}
               name="submitIntent"
+              onClick={() => handleIntentClick("complete_and_generate_plan_summaries")}
               type="submit"
-              value="save_and_generate_plan_summaries"
+              value="complete_and_generate_plan_summaries"
             >
-              {pending ? "Saving + generating AI summaries..." : "Save + Generate AI summaries"}
+              {pending && pendingIntent === "complete_and_generate_plan_summaries"
+                ? "Completing + generating AI summaries..."
+                : "Complete + Generate AI"}
             </button>
           ) : null}
           {note.note_type === "follow_up" ? (
@@ -779,10 +822,13 @@ export function NoteView({ note, patient }: NoteViewProps) {
               className="button button-management"
               disabled={pending}
               name="submitIntent"
+              onClick={() => handleIntentClick("complete_and_discharge")}
               type="submit"
-              value="save_and_discharge"
+              value="complete_and_discharge"
             >
-              {pending ? "Saving + preparing discharge..." : "Save + Discharge patient"}
+              {pending && pendingIntent === "complete_and_discharge"
+                ? "Completing + preparing discharge..."
+                : "Complete + Discharge patient"}
             </button>
           ) : null}
           {state.success ? <p className="form-success">{state.success}</p> : null}
