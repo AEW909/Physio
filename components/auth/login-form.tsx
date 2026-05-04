@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { signInAction } from "@/app/login/actions";
 
@@ -33,6 +34,10 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       <button className="button button-primary" type="submit" disabled={pending}>
         {pending ? "Signing in..." : "Sign in"}
       </button>
+
+      <Link className="button button-secondary" href="/forgot-password">
+        Forgot password?
+      </Link>
     </form>
   );
 }

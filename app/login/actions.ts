@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getBaseUrl } from "@/lib/site-url";
 
 type ActionState = {
   error?: string;
@@ -41,4 +42,28 @@ export async function signOutAction() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+export async function requestPasswordResetAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState & { success?: string }> {
+  const email = readString(formData, "email");
+
+  if (!email) {
+    return { error: "Enter the email linked to the staff account." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${getBaseUrl()}reset-password`,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return {
+    success: "If that email exists in the system, a password reset link has been sent.",
+  };
 }
