@@ -1,5 +1,4 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { ArchiveToggleForm } from "@/components/patients/archive-toggle-form";
 import { PatientList } from "@/components/patients/patient-list";
 import { PatientSearch } from "@/components/patients/patient-search";
 import { getCurrentProfile, requireRole } from "@/lib/auth/session";
