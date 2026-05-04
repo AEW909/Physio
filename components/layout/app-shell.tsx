@@ -6,11 +6,16 @@ import type { StaffProfile } from "@/lib/auth/types";
 type AppShellProps = {
   title: string;
   description?: string;
+  eyebrow?: string;
   profile: StaffProfile;
+  breadcrumbs?: Array<{
+    label: string;
+    href?: string;
+  }>;
   children: ReactNode;
 };
 
-export function AppShell({ title, description, profile, children }: AppShellProps) {
+export function AppShell({ title, description, eyebrow = "Staff Module", profile, breadcrumbs, children }: AppShellProps) {
   return (
     <div className="app-frame">
       <TopNav profile={profile} />
@@ -18,9 +23,18 @@ export function AppShell({ title, description, profile, children }: AppShellProp
         <section className="workspace">
         <header className="workspace-header">
           <div>
-            <p className="eyebrow">Staff Module</p>
+            <p className="eyebrow">{eyebrow}</p>
             <h1>{title}</h1>
             {description ? <p className="lede">{description}</p> : null}
+            {breadcrumbs?.length ? (
+              <nav aria-label="Breadcrumb" className="breadcrumb-trail">
+                {breadcrumbs.map((crumb, index) => (
+                  <span className="breadcrumb-item" key={`${crumb.label}-${index}`}>
+                    {crumb.href ? <Link href={crumb.href}>{crumb.label}</Link> : <span>{crumb.label}</span>}
+                  </span>
+                ))}
+              </nav>
+            ) : null}
           </div>
         </header>
         {children}

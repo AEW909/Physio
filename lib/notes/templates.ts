@@ -61,16 +61,20 @@ export const CERVICAL_QUESTION_OPTIONS = [
 ] as const;
 
 export const MODALITY_OPTIONS = [
-  { value: "reduce_pain", label: "Reduce pain" },
   { value: "manual", label: "Manual" },
-  { value: "increase_rom", label: "Increase ROM" },
   { value: "electrotherapy", label: "Electrotherapy" },
-  { value: "return_to_sport_or_hobby", label: "Return to sport / hobby" },
+  { value: "ultrasound", label: "Ultrasound" },
   { value: "acupuncture", label: "Acupuncture" },
-  { value: "improve_function", label: "Improve function" },
   { value: "exercises_self_manage", label: "Exercises / self-manage" },
-  { value: "return_to_work", label: "Return to work" },
   { value: "advice", label: "Advice" },
+] as const;
+
+export const GOAL_OPTIONS = [
+  { value: "reduce_pain", label: "Reduce pain" },
+  { value: "improve_function", label: "Improve function" },
+  { value: "increase_rom", label: "Increase ROM" },
+  { value: "return_to_work", label: "Return to work" },
+  { value: "return_to_sport_or_hobby", label: "Return to sport / hobby" },
 ] as const;
 
 export function createInitialAssessmentContent() {
@@ -80,11 +84,19 @@ export function createInitialAssessmentContent() {
       onset_pattern: [] as string[],
       investigations: [] as string[],
       symptom_features: [] as string[],
-      nprs: "",
+      nprs_best: "",
+      nprs_current: "",
+      nprs_worst: "",
       social_history: "",
-      diurnal_pattern: "",
-      aggs: "",
-      ease: "",
+      pattern_factors: "",
+    },
+    medical_history: {
+      past_medical_history: [] as string[],
+      drug_history: "",
+      uses_steroids: false,
+      uses_anticoagulants: false,
+      past_medical_history_details: "",
+      past_operations: "",
     },
     special_questions: {
       weight_loss: false,
@@ -133,25 +145,29 @@ export function createInitialAssessmentContent() {
       opinion: "",
       consent_to_treatment: true,
     },
-    plan: {
-      problems_and_goals: "",
-      measure: "",
-      timeframe_weeks: "",
-      modalities: {
+      plan: {
+        problems_and_goals: "",
+        measure: "",
+        timeframe_weeks: "",
+      goals: {
         reduce_pain: false,
-        manual: false,
-        increase_rom: false,
-        electrotherapy: false,
-        return_to_sport_or_hobby: false,
-        acupuncture: false,
         improve_function: false,
-        exercises_self_manage: false,
+        increase_rom: false,
         return_to_work: false,
-        advice: false,
+        return_to_sport_or_hobby: false,
       },
-      modality_notes: "",
-    },
-  };
+      modalities: {
+        manual: false,
+        electrotherapy: false,
+        ultrasound: false,
+        acupuncture: false,
+        exercises_self_manage: false,
+        advice: false,
+        },
+        actual_treatment_given: "",
+        modality_notes: "",
+      },
+    };
 }
 
 export function createFollowUpContent() {

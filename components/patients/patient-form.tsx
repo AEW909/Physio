@@ -2,7 +2,6 @@
 
 import { useActionState } from "react";
 import { type CreatePatientState, createPatientAction, updatePatientAction } from "@/app/patients/actions";
-import { PAST_MEDICAL_HISTORY_OPTIONS } from "@/lib/patients/constants";
 import type { PatientDetail } from "@/lib/patients/types";
 
 type PatientFormProps = {
@@ -17,7 +16,6 @@ const initialState: CreatePatientState = {
 export function PatientForm({ mode, patient }: PatientFormProps) {
   const action = mode === "create" ? createPatientAction : updatePatientAction;
   const [state, formAction, pending] = useActionState(action, initialState);
-  const selectedHistory = new Set(patient?.past_medical_history ?? []);
 
   return (
     <form className="patient-form" action={formAction}>
@@ -100,77 +98,6 @@ export function PatientForm({ mode, patient }: PatientFormProps) {
         <label className="field">
           <span>GP contact</span>
           <input name="gpContact" type="text" defaultValue={patient?.gp_contact ?? ""} />
-        </label>
-
-        <fieldset className="checkbox-panel">
-          <legend>Drug history flags</legend>
-          <div className="checkbox-grid checkbox-grid-compact">
-            <label className="checkbox-item">
-              <input
-                defaultChecked={patient?.uses_steroids ?? false}
-                name="usesSteroids"
-                type="checkbox"
-                value="yes"
-              />
-              <span>Steroids</span>
-            </label>
-            <label className="checkbox-item">
-              <input
-                defaultChecked={patient?.uses_anticoagulants ?? false}
-                name="usesAnticoagulants"
-                type="checkbox"
-                value="yes"
-              />
-              <span>Anticoagulants</span>
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset className="checkbox-panel field-full">
-          <legend>Past medical history</legend>
-          <div className="checkbox-grid">
-            {PAST_MEDICAL_HISTORY_OPTIONS.map((option) => (
-              <label className="checkbox-item" key={option}>
-                <input
-                  name="pastMedicalHistory"
-                  type="checkbox"
-                  value={option}
-                  defaultChecked={selectedHistory.has(option)}
-                />
-                <span>{option}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <label className="field field-full">
-          <span>Drug history</span>
-          <textarea
-            name="drugHistory"
-            rows={3}
-            placeholder="List current relevant medications."
-            defaultValue={patient?.drug_history ?? ""}
-          />
-        </label>
-
-        <label className="field field-full">
-          <span>Further details</span>
-          <textarea
-            name="pastMedicalHistoryDetails"
-            rows={4}
-            placeholder="Add any relevant detail about the selected conditions, medications, precautions, or risks."
-            defaultValue={patient?.past_medical_history_details ?? ""}
-          />
-        </label>
-
-        <label className="field field-full">
-          <span>Past operations</span>
-          <textarea
-            name="pastOperations"
-            rows={4}
-            placeholder="List relevant operations or surgical history."
-            defaultValue={patient?.past_operations ?? ""}
-          />
         </label>
       </div>
 

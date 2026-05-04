@@ -38,6 +38,12 @@ export default async function TreatmentPlanDetailPage({ params }: TreatmentPlanD
     <AppShell
       title={plan.title}
       description="Treatment-plan view with grouped sessions, summaries, and a clean place to continue care over time."
+      eyebrow="Treatment plan"
+      breadcrumbs={[
+        { label: "Patients", href: "/patients" },
+        { label: `${patient.first_name} ${patient.last_name}`, href: `/patients/${patient.id}` },
+        { label: plan.title },
+      ]}
       profile={profile}
     >
       <div className="workspace-actions workspace-actions-spread">

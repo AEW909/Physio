@@ -29,6 +29,11 @@ export default async function PatientDetailPage({ params }: PatientDetailPagePro
     <AppShell
       title={`${patient.first_name} ${patient.last_name}`}
       description="Patient record details, treatment plans, screening, and document history."
+      eyebrow="Patient record"
+      breadcrumbs={[
+        { label: "Patients", href: "/patients" },
+        { label: `${patient.first_name} ${patient.last_name}` },
+      ]}
       profile={profile}
     >
       <div className="workspace-actions workspace-actions-spread">

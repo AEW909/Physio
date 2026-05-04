@@ -70,7 +70,7 @@ export async function createTreatmentPlanAction(
     };
   }
 
-  redirect(`/treatment-plans/${data.id}`);
+  redirect(`/treatment-plans/${data.id}/sessions/new`);
 }
 
 export async function updateTreatmentPlanAction(

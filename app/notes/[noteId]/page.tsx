@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
+import { FollowUpAiSupport } from "@/components/notes/follow-up-ai-support";
 import { NoteView } from "@/components/notes/note-view";
 import { SessionArchiveToggleForm } from "@/components/sessions/session-archive-toggle-form";
-import { GeneratePlanSummariesForm } from "@/components/treatment-plans/generate-plan-summaries-form";
 import { getAppointment } from "@/lib/appointments/queries";
 import { getCurrentProfile, requireRole } from "@/lib/auth/session";
 import { getClinicalNote } from "@/lib/notes/queries";
@@ -32,6 +32,13 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
     <AppShell
       title={note.title}
       description="Structured session note built from the physio record-card workflow."
+      eyebrow="Session note"
+      breadcrumbs={[
+        { label: "Patients", href: "/patients" },
+        { label: `${patient.first_name} ${patient.last_name}`, href: `/patients/${patient.id}` },
+        ...(treatmentPlan ? [{ label: treatmentPlan.title, href: `/treatment-plans/${treatmentPlan.id}` }] : []),
+        { label: note.title },
+      ]}
       profile={profile}
     >
       <div className="workspace-actions workspace-actions-spread">
@@ -159,14 +166,9 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
         </details>
       ) : null}
 
-      {note.note_type === "initial_assessment" && treatmentPlan ? (
-        <section className="card stack">
-          <h2>AI treatment-plan support</h2>
-          <GeneratePlanSummariesForm noteId={note.id} planId={treatmentPlan.id} />
-        </section>
-      ) : null}
+      {note.note_type === "follow_up" ? <FollowUpAiSupport noteId={note.id} /> : null}
 
-      <NoteView note={note} />
+      <NoteView note={note} patient={patient} />
     </AppShell>
   );
 }

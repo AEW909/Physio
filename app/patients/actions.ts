@@ -23,12 +23,6 @@ const patientSchema = z.object({
   gpName: z.string().trim().optional(),
   gpContact: z.string().trim().optional(),
   consentStatus: z.string().trim().optional(),
-  drugHistory: z.string().trim().optional(),
-  usesSteroids: z.boolean().default(false),
-  usesAnticoagulants: z.boolean().default(false),
-  pastMedicalHistoryDetails: z.string().trim().optional(),
-  pastOperations: z.string().trim().optional(),
-  pastMedicalHistory: z.array(z.string().trim()).default([]),
 });
 
 function getValue(formData: FormData, key: string) {
@@ -50,14 +44,6 @@ function parsePatientForm(formData: FormData) {
     gpName: getValue(formData, "gpName"),
     gpContact: getValue(formData, "gpContact"),
     consentStatus: getValue(formData, "consentStatus"),
-    drugHistory: getValue(formData, "drugHistory"),
-    usesSteroids: formData.get("usesSteroids") === "yes",
-    usesAnticoagulants: formData.get("usesAnticoagulants") === "yes",
-    pastMedicalHistoryDetails: getValue(formData, "pastMedicalHistoryDetails"),
-    pastOperations: getValue(formData, "pastOperations"),
-    pastMedicalHistory: formData
-      .getAll("pastMedicalHistory")
-      .filter((value): value is string => typeof value === "string"),
   });
 }
 
@@ -91,12 +77,6 @@ export async function createPatientAction(
       gp_name: values.gpName || null,
       gp_contact: values.gpContact || null,
       consent_status: values.consentStatus || null,
-      drug_history: values.drugHistory || null,
-      uses_steroids: values.usesSteroids,
-      uses_anticoagulants: values.usesAnticoagulants,
-      past_medical_history: values.pastMedicalHistory,
-      past_medical_history_details: values.pastMedicalHistoryDetails || null,
-      past_operations: values.pastOperations || null,
       created_by: user.id,
     })
     .select("id")
@@ -147,12 +127,6 @@ export async function updatePatientAction(
       gp_name: values.gpName || null,
       gp_contact: values.gpContact || null,
       consent_status: values.consentStatus || null,
-      drug_history: values.drugHistory || null,
-      uses_steroids: values.usesSteroids,
-      uses_anticoagulants: values.usesAnticoagulants,
-      past_medical_history: values.pastMedicalHistory,
-      past_medical_history_details: values.pastMedicalHistoryDetails || null,
-      past_operations: values.pastOperations || null,
       created_by: user.id,
     })
     .eq("id", values.patientId);

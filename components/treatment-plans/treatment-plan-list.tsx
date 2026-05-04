@@ -48,21 +48,21 @@ export function PlanSessionList({
       {sessions.length ? (
         <div className="patient-list">
           {sessions.map((session) => (
-            <article className="patient-row" key={session.id}>
+            <Link
+              className="patient-row patient-row-interactive"
+              href={session.note_id ? `/notes/${session.note_id}` : `/sessions/${session.id}`}
+              key={session.id}
+            >
               <div>
-                <Link className="patient-row-link" href={session.note_id ? `/notes/${session.note_id}` : `/sessions/${session.id}`}>
-                  <h3>{session.note_title || session.appointment_type}</h3>
-                </Link>
+                <h3>{session.note_title || session.appointment_type}</h3>
                 <p>{formatDateTime(session.scheduled_at)}</p>
               </div>
               <div className="patient-row-meta">
                 <span className="status-pill">{(session.note_type || "session").replaceAll("_", " ")}</span>
                 <span>{session.location || "No location"}</span>
-                <Link className="button button-secondary button-small" href={session.note_id ? `/notes/${session.note_id}` : `/sessions/${session.id}`}>
-                  Open
-                </Link>
+                <span>Open</span>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       ) : null}

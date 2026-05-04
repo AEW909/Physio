@@ -247,6 +247,30 @@ a {
   font-weight: 700;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(18, 24, 22, 0.36);
+  backdrop-filter: blur(8px);
+}
+
+.modal-card {
+  width: min(560px, 100%);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 72px rgba(18, 24, 22, 0.2);
+  padding: 28px;
+}
+
+.modal-card h2 {
+  margin: 0 0 12px;
+}
+
 .app-frame {
   min-height: 100vh;
 }
@@ -395,6 +419,26 @@ a {
   padding: 28px;
 }
 
+.breadcrumb-trail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumb-item:not(:last-child)::after {
+  content: "/";
+  color: rgba(100, 114, 109, 0.7);
+}
+
 .role-badge {
   display: inline-flex;
   width: fit-content;
@@ -417,6 +461,11 @@ a {
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: capitalize;
+}
+
+.status-pill-flag {
+  background: rgba(176, 74, 86, 0.14);
+  color: #8c3641;
 }
 
 .workspace {
@@ -596,6 +645,10 @@ a {
   min-width: 0;
 }
 
+.patient-row-interactive {
+  cursor: pointer;
+}
+
 .patient-row h3 {
   margin: 0 0 6px;
 }
@@ -674,8 +727,130 @@ a {
   gap: 18px;
 }
 
+.note-jump-nav {
+  position: sticky;
+  top: 98px;
+  z-index: 8;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+}
+
+.note-jump-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(247, 250, 248, 0.9);
+  color: var(--brand-deep);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .note-form-footer {
   padding-bottom: 10px;
+}
+
+.note-form-footer-sticky {
+  position: sticky;
+  bottom: 12px;
+  z-index: 10;
+  padding: 14px 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+}
+
+.note-section-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.note-section-summary {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 20px 22px;
+}
+
+.note-section-summary::-webkit-details-marker {
+  display: none;
+}
+
+.note-section-summary h2 {
+  margin-bottom: 6px;
+}
+
+.note-section-summary p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.note-section-toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.note-section-toggle-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.86);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-deep);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.note-section-toggle-icon::before {
+  content: "+";
+}
+
+.note-section-panel[open] .note-section-toggle-icon::before {
+  content: "−";
+}
+
+.note-section-body {
+  padding: 0 22px 22px;
+}
+
+.note-prompt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.note-prompt-block {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(247, 250, 248, 0.82);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.note-form-grid-nprs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .note-grid {
@@ -820,5 +995,9 @@ a {
   .note-checkbox-grid-compact,
   .note-checkbox-grid-dense {
     grid-template-columns: 1fr;
+  }
+
+  .note-jump-nav {
+    top: 84px;
   }
 }
