@@ -21,14 +21,45 @@ export function ResetPasswordForm() {
     let active = true;
 
     const initialise = async () => {
-      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-      const hasRecoveryParams =
-        hashParams.has("access_token") || hashParams.get("type") === "recovery" || hashParams.has("refresh_token");
+      const url = new URL(window.location.href);
+      const searchParams = url.searchParams;
+      const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
 
-      if (hasRecoveryParams) {
-        if (active) {
-          setStatus("ready");
+      const recoveryCode = searchParams.get("code");
+      if (recoveryCode) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(recoveryCode);
+
+        if (!active) return;
+
+        if (exchangeError) {
+          setError(exchangeError.message);
+          setStatus("error");
+          return;
         }
+
+        window.history.replaceState({}, "", "/reset-password");
+        setStatus("ready");
+        return;
+      }
+
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      if (accessToken && refreshToken) {
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (!active) return;
+
+        if (setSessionError) {
+          setError(setSessionError.message);
+          setStatus("error");
+          return;
+        }
+
+        window.history.replaceState({}, "", "/reset-password");
+        setStatus("ready");
         return;
       }
 
