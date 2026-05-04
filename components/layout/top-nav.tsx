@@ -14,6 +14,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/patients", label: "Patients" },
   { href: "/screening", label: "Screening" },
+  { href: "/account", label: "Account" },
 ];
 
 export function TopNav({ profile }: TopNavProps) {

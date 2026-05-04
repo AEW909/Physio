@@ -72,13 +72,14 @@ export default async function DashboardPage() {
             <span className="role-badge">{profile.role}</span>
           </div>
           <ul className="dashboard-bullet-list">
-            <li>{dashboard.counts.activeTreatmentPlans} active treatment plans currently in progress.</li>
+            <li>{dashboard.clinicOverview.activeTreatmentPlans} active treatment plans currently in progress.</li>
             <li>
-              {dashboard.counts.draftNotes} of your draft note
-              {dashboard.counts.draftNotes === 1 ? "" : "s"} waiting to be finished or reviewed.
+              {dashboard.clinicOverview.draftNotes} draft note
+              {dashboard.clinicOverview.draftNotes === 1 ? "" : "s"} currently open across the clinic.
             </li>
             <li>
-              Patient visibility and treatment-plan ownership are now scoped to the logged-in clinician.
+              {dashboard.clinicOverview.activePatients} active patient record
+              {dashboard.clinicOverview.activePatients === 1 ? "" : "s"} currently in the live clinic directory.
             </li>
           </ul>
         </article>
@@ -87,18 +88,18 @@ export default async function DashboardPage() {
       <section className="dashboard-metric-grid">
         <article className="card dashboard-metric-card">
           <p className="dashboard-metric-label">Active patients</p>
-          <p className="dashboard-metric-value">{dashboard.counts.activePatients}</p>
-          <p className="dashboard-metric-note">Available in the live clinical directory.</p>
+          <p className="dashboard-metric-value">{dashboard.caseload.activePatients}</p>
+          <p className="dashboard-metric-note">Patients in your current active caseload.</p>
         </article>
         <article className="card dashboard-metric-card">
           <p className="dashboard-metric-label">Active plans</p>
-          <p className="dashboard-metric-value">{dashboard.counts.activeTreatmentPlans}</p>
-          <p className="dashboard-metric-note">Current episodes of care being worked through.</p>
+          <p className="dashboard-metric-value">{dashboard.caseload.activeTreatmentPlans}</p>
+          <p className="dashboard-metric-note">Treatment plans you are currently managing.</p>
         </article>
         <article className="card dashboard-metric-card">
           <p className="dashboard-metric-label">Draft notes</p>
-          <p className="dashboard-metric-value">{dashboard.counts.draftNotes}</p>
-          <p className="dashboard-metric-note">Notes that still need clinician completion.</p>
+          <p className="dashboard-metric-value">{dashboard.caseload.draftNotes}</p>
+          <p className="dashboard-metric-note">Your notes that still need clinician completion.</p>
         </article>
       </section>
 
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
               <p className="eyebrow">Needs finishing</p>
               <h2>Your draft notes</h2>
               <p className="dashboard-section-note">
-                Showing the latest {dashboard.draftNotes.length} of {dashboard.counts.draftNotes}.
+                Showing the latest {dashboard.draftNotes.length} of {dashboard.caseload.draftNotes}.
               </p>
             </div>
           </div>

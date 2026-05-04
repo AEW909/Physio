@@ -1,23 +1,22 @@
 "use client";
 
-import { useTransition } from "react";
+import { useFormStatus } from "react-dom";
 import { signOutAction } from "@/app/login/actions";
 
-export function SignOutButton() {
-  const [pending, startTransition] = useTransition();
+function SignOutSubmit() {
+  const { pending } = useFormStatus();
 
   return (
-    <button
-      className="button button-secondary"
-      type="button"
-      onClick={() => {
-        startTransition(async () => {
-          await signOutAction();
-        });
-      }}
-      disabled={pending}
-    >
+    <button className="button button-secondary" type="submit" disabled={pending}>
       {pending ? "Signing out..." : "Sign out"}
     </button>
+  );
+}
+
+export function SignOutButton() {
+  return (
+    <form action={signOutAction}>
+      <SignOutSubmit />
+    </form>
   );
 }

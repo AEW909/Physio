@@ -1,10 +1,15 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-type DashboardCounts = {
+type CaseloadCounts = {
   activePatients: number;
   activeTreatmentPlans: number;
   draftNotes: number;
-  archivedPatients: number;
+};
+
+type ClinicOverview = {
+  activePatients: number;
+  activeTreatmentPlans: number;
+  draftNotes: number;
 };
 
 export type DashboardPatientItem = {
@@ -40,7 +45,8 @@ export type DashboardDraftNoteItem = {
 };
 
 export type DashboardData = {
-  counts: DashboardCounts;
+  caseload: CaseloadCounts;
+  clinicOverview: ClinicOverview;
   recentPatients: DashboardPatientItem[];
   activePlans: DashboardPlanItem[];
   draftNotes: DashboardDraftNoteItem[];
@@ -68,20 +74,58 @@ export async function getDashboardData(currentUserId: string): Promise<Dashboard
     ),
   );
 
-  const { data: allActivePlanData, error: allActivePlanError } = clinicianPlanIds.length
-    ? await supabase
+  const [allActivePlanResult, clinicActivePatientsResult, clinicActivePlansResult, clinicDraftNotesResult, myDraftNotesResult, myDraftNotePreviewResult] =
+    await Promise.all([
+      clinicianPlanIds.length
+        ? supabase
+            .from("treatment_plans")
+            .select("id, title, status, updated_at, first_session_at, patient_id")
+            .eq("is_archived", false)
+            .eq("status", "active")
+            .in("id", clinicianPlanIds)
+        : Promise.resolve({ data: [], error: null }),
+      supabase.from("patients").select("id", { count: "exact", head: true }).eq("is_archived", false),
+      supabase
         .from("treatment_plans")
-        .select("id, title, status, updated_at, first_session_at, patient_id")
+        .select("id", { count: "exact", head: true })
         .eq("is_archived", false)
-        .eq("status", "active")
-        .in("id", clinicianPlanIds)
-    : { data: [], error: null };
+        .eq("status", "active"),
+      supabase.from("clinical_notes").select("id", { count: "exact", head: true }).eq("status", "draft"),
+      supabase.from("clinical_notes").select("id", { count: "exact", head: true }).eq("status", "draft").eq("created_by", currentUserId),
+      supabase
+        .from("clinical_notes")
+        .select("id, title, note_type, updated_at, patient_id")
+        .eq("status", "draft")
+        .eq("created_by", currentUserId)
+        .order("updated_at", { ascending: false })
+        .limit(5),
+    ]);
 
-  if (allActivePlanError) {
-    throw new Error(`Failed to load active treatment plans: ${allActivePlanError.message}`);
+  if (allActivePlanResult.error) {
+    throw new Error(`Failed to load active treatment plans: ${allActivePlanResult.error.message}`);
   }
 
-  const allActivePlanRows = ((allActivePlanData ?? []) as Array<{
+  if (clinicActivePatientsResult.error) {
+    throw new Error(`Failed to count clinic patients: ${clinicActivePatientsResult.error.message}`);
+  }
+
+  if (clinicActivePlansResult.error) {
+    throw new Error(`Failed to count clinic treatment plans: ${clinicActivePlansResult.error.message}`);
+  }
+
+  if (clinicDraftNotesResult.error) {
+    throw new Error(`Failed to count clinic draft notes: ${clinicDraftNotesResult.error.message}`);
+  }
+
+  if (myDraftNotesResult.error) {
+    throw new Error(`Failed to count clinician draft notes: ${myDraftNotesResult.error.message}`);
+  }
+
+  if (myDraftNotePreviewResult.error) {
+    throw new Error(`Failed to load clinician draft notes: ${myDraftNotePreviewResult.error.message}`);
+  }
+
+  const allActivePlanRows = ((allActivePlanResult.data ?? []) as Array<{
     id: string;
     title: string;
     status: "active" | "completed" | "on_hold";
@@ -92,8 +136,7 @@ export async function getDashboardData(currentUserId: string): Promise<Dashboard
 
   const activePatientIds = Array.from(new Set(allActivePlanRows.map((row) => row.patient_id)));
 
-  const [draftNotesResult, recentPatientsResult, notesResult] = await Promise.all([
-    supabase.from("clinical_notes").select("id", { count: "exact", head: true }).eq("status", "draft").eq("created_by", currentUserId),
+  const [recentPatientsResult, patientLookupResult] = await Promise.all([
     activePatientIds.length
       ? supabase
           .from("patients")
@@ -103,29 +146,38 @@ export async function getDashboardData(currentUserId: string): Promise<Dashboard
           .order("updated_at", { ascending: false })
           .limit(5)
       : Promise.resolve({ data: [], error: null }),
-    supabase
-      .from("clinical_notes")
-      .select("id, title, note_type, updated_at, patient_id")
-      .eq("status", "draft")
-      .eq("created_by", currentUserId)
-      .order("updated_at", { ascending: false })
-      .limit(5),
+    activePatientIds.length || (myDraftNotePreviewResult.data ?? []).length
+      ? supabase
+          .from("patients")
+          .select("id, first_name, last_name")
+          .in(
+            "id",
+            Array.from(
+              new Set([
+                ...activePatientIds,
+                ...((myDraftNotePreviewResult.data ?? []) as Array<{ patient_id: string }>).map((row) => row.patient_id),
+              ]),
+            ),
+          )
+      : Promise.resolve({ data: [], error: null }),
   ]);
-
-  if (draftNotesResult.error) {
-    throw new Error(`Failed to count draft notes: ${draftNotesResult.error.message}`);
-  }
 
   if (recentPatientsResult.error) {
     throw new Error(`Failed to load recent patients: ${recentPatientsResult.error.message}`);
   }
 
-  if (notesResult.error) {
-    throw new Error(`Failed to load draft notes: ${notesResult.error.message}`);
+  if (patientLookupResult.error) {
+    throw new Error(`Failed to load patient lookup for dashboard: ${patientLookupResult.error.message}`);
   }
 
-  const planRows = allActivePlanRows.slice(0, 5);
-  const noteRows = (notesResult.data ?? []) as Array<{
+  const patientLookup = new Map(
+    ((patientLookupResult.data ?? []) as Array<{ id: string; first_name: string; last_name: string }>).map((patient) => [
+      patient.id,
+      patient,
+    ]),
+  );
+
+  const noteRows = (myDraftNotePreviewResult.data ?? []) as Array<{
     id: string;
     title: string;
     note_type: "initial_assessment" | "follow_up" | "discharge";
@@ -133,44 +185,19 @@ export async function getDashboardData(currentUserId: string): Promise<Dashboard
     patient_id: string;
   }>;
 
-  const patientLookupIds = Array.from(new Set([...activePatientIds, ...noteRows.map((row) => row.patient_id)]));
-
-  let patientLookup = new Map<
-    string,
-    {
-      id: string;
-      first_name: string;
-      last_name: string;
-    }
-  >();
-
-  if (patientLookupIds.length > 0) {
-    const { data: lookupData, error: lookupError } = await supabase
-      .from("patients")
-      .select("id, first_name, last_name")
-      .in("id", patientLookupIds);
-
-    if (lookupError) {
-      throw new Error(`Failed to load patient lookup for dashboard: ${lookupError.message}`);
-    }
-
-    patientLookup = new Map(
-      ((lookupData ?? []) as Array<{ id: string; first_name: string; last_name: string }>).map((patient) => [
-        patient.id,
-        patient,
-      ]),
-    );
-  }
-
   return {
-    counts: {
+    caseload: {
       activePatients: activePatientIds.length,
       activeTreatmentPlans: allActivePlanRows.length,
-      draftNotes: draftNotesResult.count ?? 0,
-      archivedPatients: 0,
+      draftNotes: myDraftNotesResult.count ?? 0,
+    },
+    clinicOverview: {
+      activePatients: clinicActivePatientsResult.count ?? 0,
+      activeTreatmentPlans: clinicActivePlansResult.count ?? 0,
+      draftNotes: clinicDraftNotesResult.count ?? 0,
     },
     recentPatients: (recentPatientsResult.data ?? []) as DashboardPatientItem[],
-    activePlans: planRows.map((row) => ({
+    activePlans: allActivePlanRows.slice(0, 5).map((row) => ({
       id: row.id,
       title: row.title,
       status: row.status,

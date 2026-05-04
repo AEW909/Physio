@@ -12,3 +12,4 @@ coverage/
 .supabase/
 supabase/.temp/
 tsconfig.tsbuildinfo
+dev-*.log
