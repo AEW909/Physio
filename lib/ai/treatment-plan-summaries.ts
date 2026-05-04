@@ -12,6 +12,17 @@ type GenerateTreatmentPlanSummariesInput = {
   noteContent: Record<string, unknown>;
 };
 
+type ResponsesApiPayload = {
+  output_text?: string;
+  output?: Array<{
+    type?: string;
+    content?: Array<{
+      type?: string;
+      text?: string;
+    }>;
+  }>;
+};
+
 function asRecord(value: unknown) {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -124,6 +135,22 @@ function buildInitialAssessmentSummary(noteContent: Record<string, unknown>) {
   ].join("\n");
 }
 
+function extractStructuredOutputText(payload: ResponsesApiPayload) {
+  if (typeof payload.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text;
+  }
+
+  for (const item of payload.output ?? []) {
+    for (const contentItem of item.content ?? []) {
+      if (typeof contentItem.text === "string" && contentItem.text.trim()) {
+        return contentItem.text;
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function generateTreatmentPlanSummaries(input: GenerateTreatmentPlanSummariesInput) {
   const env = getServerEnv();
   const schema = {
@@ -202,8 +229,8 @@ export async function generateTreatmentPlanSummaries(input: GenerateTreatmentPla
     throw new Error(`OpenAI request failed: ${response.status} ${errorText}`);
   }
 
-  const payload = (await response.json()) as { output_text?: string };
-  const outputText = payload.output_text;
+  const payload = (await response.json()) as ResponsesApiPayload;
+  const outputText = extractStructuredOutputText(payload);
 
   if (!outputText) {
     throw new Error("OpenAI response did not include structured output text.");
