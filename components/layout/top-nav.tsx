@@ -40,8 +40,13 @@ export function TopNav({ profile }: TopNavProps) {
         </Link>
 
         <div className="topbar-actions">
-          <Link className="button button-secondary button-small topbar-home-link" href="/dashboard">
-            Home
+          <Link
+            aria-label="Home"
+            className="button button-secondary button-small topbar-home-link"
+            href="/dashboard"
+            title="Home"
+          >
+            <span aria-hidden="true">⌂</span>
           </Link>
           <button
             aria-controls="primary-menu"

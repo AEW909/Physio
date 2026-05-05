@@ -222,6 +222,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
   const [state, formAction, pending] = useActionState(updateNoteAction, initialState);
   const [isDirty, setIsDirty] = useState(false);
   const [pendingNavigationHref, setPendingNavigationHref] = useState<string | null>(null);
+  const [errorModalMessage, setErrorModalMessage] = useState<string | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
   const [pendingIntent, setPendingIntent] = useState<string | null>(null);
   const isSubmittingRef = useRef(false);
@@ -313,6 +314,10 @@ export function NoteView({ note, patient }: NoteViewProps) {
     setPendingNavigationHref(null);
   }
 
+  function dismissErrorModal() {
+    setErrorModalMessage(null);
+  }
+
   function leavePage() {
     if (!pendingNavigationHref) return;
     const href = pendingNavigationHref;
@@ -334,6 +339,12 @@ export function NoteView({ note, patient }: NoteViewProps) {
       setPendingIntent(null);
     }
   }, [pending]);
+
+  useEffect(() => {
+    if (state.error) {
+      setErrorModalMessage(state.error);
+    }
+  }, [state.error]);
 
   useEffect(() => {
     setHasMounted(true);
@@ -398,6 +409,32 @@ export function NoteView({ note, patient }: NoteViewProps) {
                   </button>
                   <button className="button button-management" onClick={leavePage} type="button">
                     Leave without saving
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {hasMounted && errorModalMessage
+        ? createPortal(
+            <div className="modal-backdrop" role="presentation">
+              <div
+                aria-describedby="note-error-description"
+                aria-labelledby="note-error-title"
+                aria-modal="true"
+                className="modal-card"
+                role="dialog"
+              >
+                <p className="eyebrow">Harris Physiotherapy</p>
+                <h2 id="note-error-title">We couldn&apos;t complete that action</h2>
+                <p className="lede" id="note-error-description">
+                  {errorModalMessage}
+                </p>
+                <div className="workspace-actions">
+                  <button className="button button-primary" onClick={dismissErrorModal} type="button">
+                    Close
                   </button>
                 </div>
               </div>
@@ -965,7 +1002,6 @@ export function NoteView({ note, patient }: NoteViewProps) {
             </button>
           ) : null}
           {state.success ? <p className="form-success">{state.success}</p> : null}
-          {state.error ? <p className="form-error">{state.error}</p> : null}
         </div>
       </form>
     </>
