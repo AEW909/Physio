@@ -2,14 +2,16 @@ import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { PatientDetail, PatientListItem } from "@/lib/patients/types";
 
-export async function listPatients(search?: string, status: "active" | "archived" = "active") {
+export async function listPatients(
+  search?: string,
+  status: "active" | "archived" = "active",
+  sort: "surname" | "last_seen" = "surname",
+) {
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("patients")
-    .select("id, first_name, last_name, date_of_birth, email, phone, created_at, is_archived, archived_at")
-    .eq("is_archived", status === "archived")
-    .order("last_name", { ascending: true })
-    .order("first_name", { ascending: true });
+    .select("id, first_name, last_name, date_of_birth, email, phone, created_at, updated_at, is_archived, archived_at")
+    .eq("is_archived", status === "archived");
 
   const term = search?.trim();
   if (term) {
@@ -24,7 +26,59 @@ export async function listPatients(search?: string, status: "active" | "archived
     throw new Error(`Failed to load patients: ${error.message}`);
   }
 
-  return (data ?? []) as PatientListItem[];
+  const patients: PatientListItem[] = ((data ?? []) as PatientListItem[]).map((patient) => ({
+    ...patient,
+    last_seen_at: null,
+  }));
+
+  if (!patients.length) {
+    return patients;
+  }
+
+  const patientIds = patients.map((patient) => patient.id);
+  const { data: appointmentData, error: appointmentError } = await supabase
+    .from("appointments")
+    .select("patient_id, scheduled_at")
+    .in("patient_id", patientIds)
+    .eq("is_archived", false)
+    .order("scheduled_at", { ascending: false });
+
+  if (appointmentError) {
+    throw new Error(`Failed to load patient last-seen dates: ${appointmentError.message}`);
+  }
+
+  const lastSeenByPatient = new Map<string, string>();
+  for (const row of (appointmentData ?? []) as Array<{ patient_id: string; scheduled_at: string }>) {
+    if (!lastSeenByPatient.has(row.patient_id)) {
+      lastSeenByPatient.set(row.patient_id, row.scheduled_at);
+    }
+  }
+
+  patients.forEach((patient) => {
+    patient.last_seen_at = lastSeenByPatient.get(patient.id) ?? null;
+  });
+
+  if (sort === "last_seen") {
+    patients.sort((left, right) => {
+      const leftTime = left.last_seen_at ? new Date(left.last_seen_at).getTime() : 0;
+      const rightTime = right.last_seen_at ? new Date(right.last_seen_at).getTime() : 0;
+      if (rightTime !== leftTime) {
+        return rightTime - leftTime;
+      }
+
+      const surnameCompare = left.last_name.localeCompare(right.last_name, "en-GB", { sensitivity: "base" });
+      if (surnameCompare !== 0) return surnameCompare;
+      return left.first_name.localeCompare(right.first_name, "en-GB", { sensitivity: "base" });
+    });
+  } else {
+    patients.sort((left, right) => {
+      const surnameCompare = left.last_name.localeCompare(right.last_name, "en-GB", { sensitivity: "base" });
+      if (surnameCompare !== 0) return surnameCompare;
+      return left.first_name.localeCompare(right.first_name, "en-GB", { sensitivity: "base" });
+    });
+  }
+
+  return patients;
 }
 
 export async function getPatient(patientId: string) {

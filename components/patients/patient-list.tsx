@@ -17,6 +17,16 @@ function formatDob(dateOfBirth: string | null) {
   }).format(new Date(dateOfBirth));
 }
 
+function formatLastSeen(date: string | null) {
+  if (!date) return "Not yet seen in clinic";
+
+  return `Last seen ${new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(date))}`;
+}
+
 export function PatientList({ patients, searchTerm, status }: PatientListProps) {
   if (!patients.length) {
     return (
@@ -51,16 +61,17 @@ export function PatientList({ patients, searchTerm, status }: PatientListProps) 
         </div>
       </div>
 
-      <div className="patient-list">
+      <div className="patient-list patient-list-scroll">
         {patients.map((patient) => (
           <Link className="patient-row" href={`/patients/${patient.id}`} key={patient.id}>
             <div>
               <h3>
-                {patient.first_name} {patient.last_name}
+                {patient.last_name}, {patient.first_name}
               </h3>
               <p>{formatDob(patient.date_of_birth)}</p>
             </div>
             <div className="patient-row-meta">
+              <span>{formatLastSeen(patient.last_seen_at)}</span>
               <span>{patient.email || "No email"}</span>
               <span>{patient.phone || "No phone"}</span>
               {patient.is_archived && patient.archived_at ? (

@@ -41,6 +41,12 @@ function asBoolean(value: unknown) {
   return value === true;
 }
 
+function toLabelCase(value: string) {
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
 function formatCheckedFlags(source: Record<string, unknown>, labels: Record<string, string>) {
   return Object.entries(labels)
     .filter(([key]) => asBoolean(source[key]))
@@ -75,7 +81,8 @@ function buildInitialAssessmentSummary(noteContent: Record<string, unknown>) {
     headache: "Headache",
     nausea: "Nausea",
     dizziness: "Dizziness",
-    pins_and_needles: "Pins and needles",
+    pins_and_needles_intermittent: "Pins and needles intermittent",
+    pins_and_needles_constant: "Pins and needles constant",
     numbness: "Numbness",
     cough_sneeze: "Cough / sneeze aggravation",
     bladder_bowel: "Bladder / bowel change",
@@ -117,6 +124,9 @@ function buildInitialAssessmentSummary(noteContent: Record<string, unknown>) {
     advice: "Advice",
   });
 
+  const bloodPressure = asStringArray(medicalHistory.blood_pressure).map(toLabelCase);
+  const diabetes = asStringArray(medicalHistory.diabetes).map(toLabelCase);
+
   return [
     `Treatment plan label: ${asString(noteContent.plan_title) || "Not supplied"}`,
     `HPC: ${asString(history.hpc) || "Not recorded"}`,
@@ -125,9 +135,14 @@ function buildInitialAssessmentSummary(noteContent: Record<string, unknown>) {
     `Symptom features: ${asStringArray(history.symptom_features).join(", ") || "Not recorded"}`,
     `Pain rating (NPRS): Best ${asString(history.nprs_best) || "not recorded"}, Current ${asString(history.nprs_current) || asString(history.nprs) || "not recorded"}, Worst ${asString(history.nprs_worst) || "not recorded"}`,
     `Social history: ${asString(history.social_history) || "Not recorded"}`,
-    `Pattern, aggravating and easing factors: ${asString(history.pattern_factors) || "Not recorded"}`,
+    `Diurnal pattern: ${asString(history.diurnal_pattern) || "Not recorded"}`,
+    `Aggravating factors: ${asString(history.aggravating_factors) || "Not recorded"}`,
+    `Easing factors: ${asString(history.easing_factors) || "Not recorded"}`,
     `Past medical history: ${asStringArray(medicalHistory.past_medical_history).join(", ") || "Not recorded"}`,
-    `Drug history: ${asString(medicalHistory.drug_history) || "Not recorded"}`,
+    `Blood pressure flags: ${bloodPressure.join(", ") || "Not recorded"}`,
+    `Diabetes flags: ${diabetes.join(", ") || "Not recorded"}`,
+    `No significant history selected: ${asBoolean(medicalHistory.no_significant_history) ? "Yes" : "No"}`,
+    `Medication history: ${asString(medicalHistory.medication_history) || "Not recorded"}`,
     `Steroids: ${asBoolean(medicalHistory.uses_steroids) ? "Yes" : "No"}`,
     `Anticoagulants: ${asBoolean(medicalHistory.uses_anticoagulants) ? "Yes" : "No"}`,
     `Past medical history details: ${asString(medicalHistory.past_medical_history_details) || "Not recorded"}`,
@@ -150,7 +165,6 @@ function buildInitialAssessmentSummary(noteContent: Record<string, unknown>) {
     `Goals selected: ${goalsChosen.join(", ") || "None recorded"}`,
     `Modalities selected: ${modalitiesChosen.join(", ") || "None recorded"}`,
     `Actual treatment given: ${asString(plan.actual_treatment_given) || "Not recorded"}`,
-    `Modality notes: ${asString(plan.modality_notes) || "Not recorded"}`,
   ].join("\n");
 }
 

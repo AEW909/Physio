@@ -470,6 +470,17 @@ a {
   box-shadow: var(--shadow);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-home-link {
+  min-height: 54px;
+  padding-inline: 16px;
+}
+
 .brand-lockup {
   display: flex;
   align-items: center;
@@ -706,7 +717,13 @@ a {
 
 .patient-list {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+}
+
+.patient-list-scroll {
+  max-height: 62vh;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .plan-list {
@@ -770,7 +787,7 @@ a {
 }
 
 .plan-panel[open] .plan-toggle-icon::before {
-  content: "−";
+  content: "-";
 }
 
 .plan-summary-meta {
@@ -809,10 +826,10 @@ a {
 .patient-row {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
-  padding: 18px;
-  border-radius: 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.68);
   min-width: 0;
@@ -823,7 +840,8 @@ a {
 }
 
 .patient-row h3 {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
+  font-size: 0.98rem;
 }
 
 .patient-row-link {
@@ -834,12 +852,13 @@ a {
 .patient-row span {
   margin: 0;
   color: var(--muted);
-  line-height: 1.6;
+  line-height: 1.45;
+  font-size: 0.9rem;
 }
 
 .patient-row-meta {
   display: grid;
-  gap: 4px;
+  gap: 3px;
   justify-items: end;
   text-align: right;
   min-width: 0;
@@ -998,7 +1017,7 @@ a {
 }
 
 .note-section-panel[open] .note-section-toggle-icon::before {
-  content: "−";
+  content: "-";
 }
 
 .note-section-body {

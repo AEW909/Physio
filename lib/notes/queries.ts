@@ -57,3 +57,19 @@ export async function getClinicalNote(noteId: string) {
     current_version: currentVersion,
   } as ClinicalNoteDetail;
 }
+
+export async function listDraftNotesForClinician(clinicianId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("clinical_notes")
+    .select("id, patient_id, appointment_id, treatment_plan_id, note_type, title, status, created_at, updated_at")
+    .eq("status", "draft")
+    .eq("created_by", clinicianId)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to load draft notes: ${error.message}`);
+  }
+
+  return (data ?? []) as ClinicalNoteListItem[];
+}

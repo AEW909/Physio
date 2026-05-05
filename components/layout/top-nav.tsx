@@ -13,6 +13,7 @@ type TopNavProps = {
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/patients", label: "Patients" },
+  { href: "/notes/drafts", label: "Draft notes" },
   { href: "/screening", label: "Screening" },
   { href: "/account", label: "Account" },
 ];
@@ -38,18 +39,23 @@ export function TopNav({ profile }: TopNavProps) {
           </div>
         </Link>
 
-        <button
-          aria-controls="primary-menu"
-          aria-expanded={open}
-          aria-label="Toggle navigation"
-          className="menu-toggle"
-          onClick={() => setOpen((current) => !current)}
-          type="button"
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+        <div className="topbar-actions">
+          <Link className="button button-secondary button-small topbar-home-link" href="/dashboard">
+            Home
+          </Link>
+          <button
+            aria-controls="primary-menu"
+            aria-expanded={open}
+            aria-label="Toggle navigation"
+            className="menu-toggle"
+            onClick={() => setOpen((current) => !current)}
+            type="button"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </div>
 
       {open ? (

@@ -45,6 +45,34 @@ function asBoolean(value: unknown) {
   return value === true;
 }
 
+function splitStoredMedicalHistory(values: string[]) {
+  const pastMedicalHistory: string[] = [];
+  const bloodPressure: string[] = [];
+  const diabetes: string[] = [];
+  let noSignificantHistory = false;
+
+  values.forEach((value) => {
+    if (value === "No significant history") {
+      noSignificantHistory = true;
+      return;
+    }
+
+    if (value.startsWith("Blood Pressure - ")) {
+      bloodPressure.push(value.replace("Blood Pressure - ", "").toLowerCase());
+      return;
+    }
+
+    if (value.startsWith("Diabetes - ")) {
+      diabetes.push(value.replace("Diabetes - ", "").toLowerCase().replace(/\s+/g, "_"));
+      return;
+    }
+
+    pastMedicalHistory.push(value);
+  });
+
+  return { pastMedicalHistory, bloodPressure, diabetes, noSignificantHistory };
+}
+
 function getLegacyGoalValues(source: Record<string, unknown>) {
   return {
     reduce_pain: asBoolean(source.reduce_pain),
@@ -207,14 +235,34 @@ export function NoteView({ note, patient }: NoteViewProps) {
   const plan = asRecord(content.plan);
   const modalities = asRecord(plan.modalities);
   const goals = Object.keys(asRecord(plan.goals)).length ? asRecord(plan.goals) : getLegacyGoalValues(modalities);
-  const selectedMedicalHistory = new Set(
+  const storedMedicalHistory = splitStoredMedicalHistory(
     asStringArray(medicalHistory.past_medical_history).length
       ? asStringArray(medicalHistory.past_medical_history)
       : patient.past_medical_history ?? [],
   );
-  const patternFactors =
-    asString(history.pattern_factors) ||
-    [asString(history.diurnal_pattern), asString(history.aggs), asString(history.ease)].filter(Boolean).join("\n");
+  const selectedMedicalHistory = new Set(storedMedicalHistory.pastMedicalHistory);
+  const selectedBloodPressure = new Set(
+    asStringArray(medicalHistory.blood_pressure).length
+      ? asStringArray(medicalHistory.blood_pressure)
+      : storedMedicalHistory.bloodPressure,
+  );
+  const selectedDiabetes = new Set(
+    asStringArray(medicalHistory.diabetes).length ? asStringArray(medicalHistory.diabetes) : storedMedicalHistory.diabetes,
+  );
+  const noSignificantHistory =
+    asBoolean(medicalHistory.no_significant_history) || storedMedicalHistory.noSignificantHistory;
+  const hasHistoryOnRecord =
+    noSignificantHistory ||
+    selectedMedicalHistory.size > 0 ||
+    selectedBloodPressure.size > 0 ||
+    selectedDiabetes.size > 0 ||
+    patient.uses_steroids ||
+    patient.uses_anticoagulants ||
+    Boolean(patient.drug_history) ||
+    Boolean(patient.past_operations);
+  const diurnalPattern = asString(history.diurnal_pattern);
+  const aggravatingFactors = asString(history.aggravating_factors) || asString(history.aggs);
+  const easingFactors = asString(history.easing_factors) || asString(history.ease);
   const neuroScreen =
     asString(objective.neuro_screen) ||
     [
@@ -429,9 +477,12 @@ export function NoteView({ note, patient }: NoteViewProps) {
                   <span aria-hidden="true" className="note-section-toggle-icon" />
                 </div>
                 <div>
-                  <h2>Medical history and medications</h2>
+                  <h2>Medical history and medication</h2>
                   <p>Check and update this at the start of the initial consultation. The latest version feeds the patient record summary.</p>
-                  {selectedMedicalHistory.size || patient.uses_steroids || patient.uses_anticoagulants || patient.drug_history || patient.past_operations ? (
+                  {noSignificantHistory ? (
+                    <span className="status-pill">No significant history</span>
+                  ) : null}
+                  {hasHistoryOnRecord && !noSignificantHistory ? (
                     <span className="status-pill status-pill-flag">History on record</span>
                   ) : null}
                 </div>
@@ -458,7 +509,59 @@ export function NoteView({ note, patient }: NoteViewProps) {
                 </fieldset>
                 <div className="note-form-grid">
                   <fieldset className="checkbox-panel">
-                    <legend>Drug flags</legend>
+                    <legend>Blood pressure</legend>
+                    <div className="checkbox-grid checkbox-grid-compact">
+                      {[
+                        { value: "high", label: "High" },
+                        { value: "low", label: "Low" },
+                        { value: "controlled", label: "Controlled" },
+                      ].map((option) => (
+                        <label className="checkbox-item" key={option.value}>
+                          <input
+                            defaultChecked={selectedBloodPressure.has(option.value)}
+                            name="medical_history.blood_pressure"
+                            type="checkbox"
+                            value={option.value}
+                          />
+                          <span>{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <fieldset className="checkbox-panel">
+                    <legend>Diabetes</legend>
+                    <div className="checkbox-grid checkbox-grid-compact">
+                      {[
+                        { value: "type_1", label: "Type 1" },
+                        { value: "type_2", label: "Type 2" },
+                      ].map((option) => (
+                        <label className="checkbox-item" key={option.value}>
+                          <input
+                            defaultChecked={selectedDiabetes.has(option.value)}
+                            name="medical_history.diabetes"
+                            type="checkbox"
+                            value={option.value}
+                          />
+                          <span>{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <fieldset className="checkbox-panel">
+                    <legend>History summary</legend>
+                    <div className="checkbox-grid checkbox-grid-compact">
+                      <label className="checkbox-item">
+                        <input
+                          defaultChecked={noSignificantHistory}
+                          name="medical_history.no_significant_history"
+                          type="checkbox"
+                        />
+                        <span>None</span>
+                      </label>
+                    </div>
+                  </fieldset>
+                  <fieldset className="checkbox-panel">
+                    <legend>Medication flags</legend>
                     <div className="checkbox-grid checkbox-grid-compact">
                       <label className="checkbox-item">
                         <input
@@ -483,9 +586,9 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     </div>
                   </fieldset>
                   <NoteTextarea
-                    label="Drug history"
-                    name="medical_history.drug_history"
-                    defaultValue={asString(medicalHistory.drug_history) || (patient.drug_history ?? "")}
+                    label="Medication history"
+                    name="medical_history.medication_history"
+                    defaultValue={asString(medicalHistory.medication_history) || (patient.drug_history ?? "")}
                     rows={4}
                   />
                   <NoteTextarea
@@ -552,10 +655,22 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     <NprsSelect label="NPRS worst" name="history.nprs_worst" defaultValue={nprsWorst} />
                   </div>
                   <NoteTextarea
-                    label="Pattern, aggravating and easing factors"
-                    name="history.pattern_factors"
-                    defaultValue={patternFactors}
-                    rows={4}
+                    label="Diurnal pattern"
+                    name="history.diurnal_pattern"
+                    defaultValue={diurnalPattern}
+                    rows={3}
+                  />
+                  <NoteTextarea
+                    label="Aggravating factors"
+                    name="history.aggravating_factors"
+                    defaultValue={aggravatingFactors}
+                    rows={3}
+                  />
+                  <NoteTextarea
+                    label="Easing factors"
+                    name="history.easing_factors"
+                    defaultValue={easingFactors}
+                    rows={3}
                   />
                 </div>
                 <div className="note-form-grid">
@@ -565,6 +680,30 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     options={SPECIAL_QUESTION_OPTIONS}
                     values={specialQuestions}
                   />
+                  <fieldset className="checkbox-panel note-checkbox-panel">
+                    <legend>Pins &amp; needles</legend>
+                    <div className="note-checkbox-grid note-checkbox-grid-compact">
+                      <label className="note-check">
+                        <input
+                          defaultChecked={
+                            asBoolean(specialQuestions.pins_and_needles_intermittent) ||
+                            (asBoolean(specialQuestions.pins_and_needles) && !asBoolean(specialQuestions.pins_and_needles_constant))
+                          }
+                          name="special_questions.pins_and_needles_intermittent"
+                          type="checkbox"
+                        />
+                        <span>Intermittent</span>
+                      </label>
+                      <label className="note-check">
+                        <input
+                          defaultChecked={asBoolean(specialQuestions.pins_and_needles_constant)}
+                          name="special_questions.pins_and_needles_constant"
+                          type="checkbox"
+                        />
+                        <span>Constant</span>
+                      </label>
+                    </div>
+                  </fieldset>
                   <BooleanGrid
                     legend="Cervical questions"
                     prefix="cervical_questions"
@@ -660,12 +799,6 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     label="Actual treatment given"
                     name="plan.actual_treatment_given"
                     defaultValue={asString(plan.actual_treatment_given)}
-                    rows={4}
-                  />
-                  <NoteTextarea
-                    label="Modality notes"
-                    name="plan.modality_notes"
-                    defaultValue={asString(plan.modality_notes)}
                     rows={4}
                   />
                 </div>

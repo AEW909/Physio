@@ -74,12 +74,48 @@ function getPlanModalities(formData: FormData) {
   };
 }
 
+function toLabelCase(value: string) {
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function flattenMedicalHistory(
+  pastMedicalHistory: string[],
+  bloodPressure: string[],
+  diabetes: string[],
+  noSignificantHistory: boolean,
+) {
+  if (noSignificantHistory) {
+    return ["No significant history"];
+  }
+
+  return [
+    ...pastMedicalHistory,
+    ...bloodPressure.map((value) => `Blood Pressure - ${toLabelCase(value)}`),
+    ...diabetes.map((value) => `Diabetes - ${toLabelCase(value)}`),
+  ];
+}
+
 function getMedicalHistory(formData: FormData) {
+  const pastMedicalHistory = formData
+    .getAll("medical_history.past_medical_history")
+    .filter((value): value is string => typeof value === "string");
+  const bloodPressure = getList(formData, "medical_history.blood_pressure");
+  const diabetes = getList(formData, "medical_history.diabetes");
+  const noSignificantHistory = getBoolean(formData, "medical_history.no_significant_history");
+
   return {
-    past_medical_history: formData
-      .getAll("medical_history.past_medical_history")
-      .filter((value): value is string => typeof value === "string"),
-    drug_history: getValue(formData, "medical_history.drug_history"),
+    past_medical_history: flattenMedicalHistory(
+      pastMedicalHistory,
+      bloodPressure,
+      diabetes,
+      noSignificantHistory,
+    ),
+    blood_pressure: noSignificantHistory ? [] : bloodPressure,
+    diabetes: noSignificantHistory ? [] : diabetes,
+    no_significant_history: noSignificantHistory,
+    medication_history: getValue(formData, "medical_history.medication_history"),
     uses_steroids: getBoolean(formData, "medical_history.uses_steroids"),
     uses_anticoagulants: getBoolean(formData, "medical_history.uses_anticoagulants"),
     past_medical_history_details: getValue(formData, "medical_history.past_medical_history_details"),
@@ -176,7 +212,9 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         nprs_current: getValue(formData, "history.nprs_current"),
         nprs_worst: getValue(formData, "history.nprs_worst"),
         social_history: getValue(formData, "history.social_history"),
-        pattern_factors: getValue(formData, "history.pattern_factors"),
+        diurnal_pattern: getValue(formData, "history.diurnal_pattern"),
+        aggravating_factors: getValue(formData, "history.aggravating_factors"),
+        easing_factors: getValue(formData, "history.easing_factors"),
       },
       medical_history: getMedicalHistory(formData),
       special_questions: {
@@ -186,7 +224,8 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         headache: getBoolean(formData, "special_questions.headache"),
         nausea: getBoolean(formData, "special_questions.nausea"),
         dizziness: getBoolean(formData, "special_questions.dizziness"),
-        pins_and_needles: getBoolean(formData, "special_questions.pins_and_needles"),
+        pins_and_needles_intermittent: getBoolean(formData, "special_questions.pins_and_needles_intermittent"),
+        pins_and_needles_constant: getBoolean(formData, "special_questions.pins_and_needles_constant"),
         numbness: getBoolean(formData, "special_questions.numbness"),
         cough_sneeze: getBoolean(formData, "special_questions.cough_sneeze"),
         bladder_bowel: getBoolean(formData, "special_questions.bladder_bowel"),
@@ -217,10 +256,7 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         other: getValue(formData, "objective.other"),
         special_tests: getValue(formData, "objective.special_tests"),
         palpation: getValue(formData, "objective.palpation"),
-        myotomes: getValue(formData, "objective.myotomes"),
-        dermatomes: getValue(formData, "objective.dermatomes"),
-        reflexes: getValue(formData, "objective.reflexes"),
-        slr: getValue(formData, "objective.slr"),
+        neuro_screen: getValue(formData, "objective.neuro_screen"),
       },
       impression: {
         opinion: getValue(formData, "impression.opinion"),
@@ -233,7 +269,6 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         goals: getPlanGoals(formData),
         modalities: getPlanModalities(formData),
         actual_treatment_given: getValue(formData, "plan.actual_treatment_given"),
-        modality_notes: getValue(formData, "plan.modality_notes"),
       },
     };
   }
@@ -336,7 +371,7 @@ export async function updateNoteAction(
       .from("patients")
       .update({
         past_medical_history: asStringArray(medicalHistory.past_medical_history),
-        drug_history: asString(medicalHistory.drug_history) || null,
+        drug_history: asString(medicalHistory.medication_history) || null,
         uses_steroids: medicalHistory.uses_steroids === true,
         uses_anticoagulants: medicalHistory.uses_anticoagulants === true,
         past_medical_history_details: asString(medicalHistory.past_medical_history_details) || null,
@@ -582,13 +617,14 @@ function summarizeInitialAssessmentContent(content: Record<string, unknown>) {
   return [
     `HPC: ${asString(history.hpc) || "Not recorded"}`,
     `Pain rating (NPRS): Best ${asString(history.nprs_best) || "not recorded"}, Current ${asString(history.nprs_current) || asString(history.nprs) || "not recorded"}, Worst ${asString(history.nprs_worst) || "not recorded"}`,
-    `Pattern, aggravating and easing factors: ${asString(history.pattern_factors) || "Not recorded"}`,
+    `Diurnal pattern: ${asString(history.diurnal_pattern) || "Not recorded"}`,
+    `Aggravating factors: ${asString(history.aggravating_factors) || "Not recorded"}`,
+    `Easing factors: ${asString(history.easing_factors) || "Not recorded"}`,
     `Objective ROM: ${asString(objective.rom) || "Not recorded"}`,
     `Special tests: ${asString(objective.special_tests) || "Not recorded"}`,
     `Clinical opinion: ${asString(impression.opinion) || "Not recorded"}`,
     `Problems and goals: ${asString(plan.problems_and_goals) || "Not recorded"}`,
     `Actual treatment given: ${asString(plan.actual_treatment_given) || "Not recorded"}`,
-    `Modality notes: ${asString(plan.modality_notes) || "Not recorded"}`,
   ].join("\n");
 }
 

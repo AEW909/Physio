@@ -83,11 +83,11 @@ export function PatientSummary({ patient }: PatientSummaryProps) {
             </dd>
           </div>
           <div>
-            <dt>Drug history</dt>
+            <dt>Medication history</dt>
             <dd>{patient.drug_history || "Not recorded"}</dd>
           </div>
           <div>
-            <dt>Drug flags</dt>
+            <dt>Medication flags</dt>
             <dd>
               {[
                 patient.uses_steroids ? "Steroids" : null,
