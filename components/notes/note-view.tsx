@@ -503,14 +503,122 @@ export function NoteView({ note, patient }: NoteViewProps) {
         <>
           <SectionJumpNav
             links={[
-              { href: "#medical-history", label: "Medical history" },
               { href: "#subjective-history", label: "Subjective" },
+              { href: "#medical-history", label: "Medical history" },
               { href: "#objective-examination", label: "Objective" },
               { href: "#impression", label: "Impression" },
               { href: "#treatment-plan", label: "Plan" },
             ]}
           />
           <div className="note-grid">
+            <details className="note-section-panel card stack note-card note-card-wide" id="subjective-history">
+              <summary className="note-section-summary">
+                <div className="note-section-toggle-wrap">
+                  <span aria-hidden="true" className="note-section-toggle-icon" />
+                </div>
+                <div>
+                  <h2>Subjective history</h2>
+                  <p>History, symptom profile, special questions, and cervical-specific prompts.</p>
+                </div>
+              </summary>
+              <div className="note-section-body stack">
+                <div className="note-form-grid">
+                  <NoteTextarea autoFocus label="PC" name="history.pc" defaultValue={asString(history.pc)} rows={4} />
+                  <NoteTextarea label="HPC" name="history.hpc" defaultValue={asString(history.hpc)} rows={5} />
+                </div>
+                <div className="note-form-grid">
+                  <NoteTextarea
+                    label="Social history"
+                    name="history.social_history"
+                    defaultValue={asString(history.social_history)}
+                    rows={5}
+                  />
+                  <CheckboxGroup
+                    compact
+                    legend="Onset pattern"
+                    name="history.onset_pattern"
+                    options={ONSET_PATTERN_OPTIONS}
+                    selected={asStringArray(history.onset_pattern)}
+                  />
+                  <CheckboxGroup
+                    compact
+                    legend="Investigations"
+                    name="history.investigations"
+                    options={INVESTIGATION_OPTIONS}
+                    selected={asStringArray(history.investigations)}
+                  />
+                  <CheckboxGroup
+                    compact
+                    legend="Symptom features"
+                    name="history.symptom_features"
+                    options={SYMPTOM_FEATURE_OPTIONS}
+                    selected={asStringArray(history.symptom_features)}
+                  />
+                  <div className="note-form-grid note-form-grid-nprs">
+                    <NprsSelect label="NPRS best" name="history.nprs_best" defaultValue={nprsBest} />
+                    <NprsSelect label="NPRS current" name="history.nprs_current" defaultValue={nprsCurrent} />
+                    <NprsSelect label="NPRS worst" name="history.nprs_worst" defaultValue={nprsWorst} />
+                  </div>
+                  <NoteTextarea
+                    label="Diurnal pattern"
+                    name="history.diurnal_pattern"
+                    defaultValue={diurnalPattern}
+                    rows={3}
+                  />
+                  <NoteTextarea
+                    label="Aggravating factors"
+                    name="history.aggravating_factors"
+                    defaultValue={aggravatingFactors}
+                    rows={3}
+                  />
+                  <NoteTextarea
+                    label="Easing factors"
+                    name="history.easing_factors"
+                    defaultValue={easingFactors}
+                    rows={3}
+                  />
+                </div>
+                <div className="note-form-grid">
+                  <BooleanGrid
+                    legend="Red flags and special questions"
+                    prefix="special_questions"
+                    options={SPECIAL_QUESTION_OPTIONS}
+                    values={specialQuestions}
+                  />
+                  <fieldset className="checkbox-panel note-checkbox-panel note-checkbox-panel-compact">
+                    <legend>Pins &amp; needles</legend>
+                    <div className="note-checkbox-grid note-checkbox-grid-compact note-checkbox-grid-inline">
+                      <label className="note-check">
+                        <input
+                          defaultChecked={
+                            asBoolean(specialQuestions.pins_and_needles_intermittent) ||
+                            (asBoolean(specialQuestions.pins_and_needles) && !asBoolean(specialQuestions.pins_and_needles_constant))
+                          }
+                          name="special_questions.pins_and_needles_intermittent"
+                          type="checkbox"
+                        />
+                        <span>Intermittent</span>
+                      </label>
+                      <label className="note-check">
+                        <input
+                          defaultChecked={asBoolean(specialQuestions.pins_and_needles_constant)}
+                          name="special_questions.pins_and_needles_constant"
+                          type="checkbox"
+                        />
+                        <span>Constant</span>
+                      </label>
+                    </div>
+                  </fieldset>
+                  <BooleanGrid
+                    legend="Cervical questions"
+                    prefix="cervical_questions"
+                    options={CERVICAL_QUESTION_OPTIONS}
+                    values={cervicalQuestions}
+                  />
+                </div>
+              </div>
+            </details>
+
             <details className="note-section-panel card stack note-card note-card-wide" id="medical-history">
               <summary className="note-section-summary">
                 <div className="note-section-toggle-wrap">
@@ -644,114 +752,6 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     name="medical_history.past_operations"
                     defaultValue={asString(medicalHistory.past_operations) || (patient.past_operations ?? "")}
                     rows={4}
-                  />
-                </div>
-              </div>
-            </details>
-
-            <details className="note-section-panel card stack note-card note-card-wide" id="subjective-history">
-              <summary className="note-section-summary">
-                <div className="note-section-toggle-wrap">
-                  <span aria-hidden="true" className="note-section-toggle-icon" />
-                </div>
-                <div>
-                  <h2>Subjective history</h2>
-                  <p>History, symptom profile, special questions, and cervical-specific prompts.</p>
-                </div>
-              </summary>
-              <div className="note-section-body stack">
-                <div className="note-form-grid">
-                  <NoteTextarea autoFocus label="PC" name="history.pc" defaultValue={asString(history.pc)} rows={4} />
-                  <NoteTextarea label="HPC" name="history.hpc" defaultValue={asString(history.hpc)} rows={5} />
-                </div>
-                <div className="note-form-grid">
-                  <NoteTextarea
-                    label="Social history"
-                    name="history.social_history"
-                    defaultValue={asString(history.social_history)}
-                    rows={5}
-                  />
-                  <CheckboxGroup
-                    compact
-                    legend="Onset pattern"
-                    name="history.onset_pattern"
-                    options={ONSET_PATTERN_OPTIONS}
-                    selected={asStringArray(history.onset_pattern)}
-                  />
-                  <CheckboxGroup
-                    compact
-                    legend="Investigations"
-                    name="history.investigations"
-                    options={INVESTIGATION_OPTIONS}
-                    selected={asStringArray(history.investigations)}
-                  />
-                  <CheckboxGroup
-                    compact
-                    legend="Symptom features"
-                    name="history.symptom_features"
-                    options={SYMPTOM_FEATURE_OPTIONS}
-                    selected={asStringArray(history.symptom_features)}
-                  />
-                  <div className="note-form-grid note-form-grid-nprs">
-                    <NprsSelect label="NPRS best" name="history.nprs_best" defaultValue={nprsBest} />
-                    <NprsSelect label="NPRS current" name="history.nprs_current" defaultValue={nprsCurrent} />
-                    <NprsSelect label="NPRS worst" name="history.nprs_worst" defaultValue={nprsWorst} />
-                  </div>
-                  <NoteTextarea
-                    label="Diurnal pattern"
-                    name="history.diurnal_pattern"
-                    defaultValue={diurnalPattern}
-                    rows={3}
-                  />
-                  <NoteTextarea
-                    label="Aggravating factors"
-                    name="history.aggravating_factors"
-                    defaultValue={aggravatingFactors}
-                    rows={3}
-                  />
-                  <NoteTextarea
-                    label="Easing factors"
-                    name="history.easing_factors"
-                    defaultValue={easingFactors}
-                    rows={3}
-                  />
-                </div>
-                <div className="note-form-grid">
-                  <BooleanGrid
-                    legend="Red flags and special questions"
-                    prefix="special_questions"
-                    options={SPECIAL_QUESTION_OPTIONS}
-                    values={specialQuestions}
-                  />
-                  <fieldset className="checkbox-panel note-checkbox-panel note-checkbox-panel-compact">
-                    <legend>Pins &amp; needles</legend>
-                    <div className="note-checkbox-grid note-checkbox-grid-compact note-checkbox-grid-inline">
-                      <label className="note-check">
-                        <input
-                          defaultChecked={
-                            asBoolean(specialQuestions.pins_and_needles_intermittent) ||
-                            (asBoolean(specialQuestions.pins_and_needles) && !asBoolean(specialQuestions.pins_and_needles_constant))
-                          }
-                          name="special_questions.pins_and_needles_intermittent"
-                          type="checkbox"
-                        />
-                        <span>Intermittent</span>
-                      </label>
-                      <label className="note-check">
-                        <input
-                          defaultChecked={asBoolean(specialQuestions.pins_and_needles_constant)}
-                          name="special_questions.pins_and_needles_constant"
-                          type="checkbox"
-                        />
-                        <span>Constant</span>
-                      </label>
-                    </div>
-                  </fieldset>
-                  <BooleanGrid
-                    legend="Cervical questions"
-                    prefix="cervical_questions"
-                    options={CERVICAL_QUESTION_OPTIONS}
-                    values={cervicalQuestions}
                   />
                 </div>
               </div>
