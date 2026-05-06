@@ -79,6 +79,7 @@ export const GOAL_OPTIONS = [
 export function createInitialAssessmentContent() {
   return {
     history: {
+      pc: "",
       hpc: "",
       onset_pattern: [] as string[],
       investigations: [] as string[],

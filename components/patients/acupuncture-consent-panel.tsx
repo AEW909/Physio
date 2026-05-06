@@ -52,7 +52,6 @@ function getStatusTone(status: AcupunctureConsentRecord["status"]) {
 
 export function AcupunctureConsentPanel({ patient, consents }: AcupunctureConsentPanelProps) {
   const currentConsent = consents[0] ?? null;
-  const completedConsents = consents.filter((consent) => consent.status !== "generated");
   const internalConsentPath = currentConsent ? `/consents/acupuncture/${currentConsent.token}` : null;
   const consentLink = currentConsent ? `${getBaseUrl()}consents/acupuncture/${currentConsent.token}` : null;
   const mailtoHref =
@@ -63,8 +62,29 @@ export function AcupunctureConsentPanel({ patient, consents }: AcupunctureConsen
       : null;
 
   return (
-    <>
-      <section className="card stack">
+    <details className="plan-panel">
+      <summary className="plan-summary-bar">
+        <div className="plan-summary-main">
+          <span aria-hidden="true" className="plan-toggle-icon" />
+        </div>
+        <div>
+          <h3>Acupuncture consent</h3>
+          <p>
+            {currentConsent
+              ? "Generate the public form, track submission, and review the completed consent."
+              : "No acupuncture consent request has been generated for this patient yet."}
+          </p>
+        </div>
+        {currentConsent ? (
+          <div className="plan-summary-meta">
+            <span className={getStatusTone(currentConsent.status)}>
+              {getAcupunctureConsentStatusLabel(currentConsent.status)}
+            </span>
+          </div>
+        ) : null}
+      </summary>
+
+      <div className="plan-panel-body stack">
         <div className="split-header">
           <div>
             <h2>Acupuncture consent</h2>
@@ -162,7 +182,7 @@ export function AcupunctureConsentPanel({ patient, consents }: AcupunctureConsen
                     <input type="hidden" name="patientId" value={patient.id} />
                     <input type="hidden" name="consentId" value={currentConsent.id} />
                     <label className="field">
-                      <span>Review notes</span>
+                      <span>Clinical reasoning</span>
                       <textarea
                         name="clinicianReviewNotes"
                         rows={4}
@@ -170,7 +190,7 @@ export function AcupunctureConsentPanel({ patient, consents }: AcupunctureConsen
                         defaultValue={currentConsent.clinician_review_notes ?? ""}
                       />
                     </label>
-                    <div className="workspace-actions">
+                    <div className="workspace-actions consent-review-actions">
                       <button className="button button-primary" name="decision" type="submit" value="approved">
                         Approve treatment
                       </button>
@@ -182,7 +202,7 @@ export function AcupunctureConsentPanel({ patient, consents }: AcupunctureConsen
                 </>
               ) : currentConsent.status === "approved" ? (
                 <p className="lede">
-                  Treatment has been approved. A completed copy remains available below for reference.
+                  Treatment has been approved. The submitted screening and consent details remain below for reference.
                 </p>
               ) : currentConsent.status === "rejected" ? (
                 <p className="lede">
@@ -198,133 +218,115 @@ export function AcupunctureConsentPanel({ patient, consents }: AcupunctureConsen
             No acupuncture consent request has been generated yet for this patient.
           </p>
         )}
-      </section>
 
-      {completedConsents.length ? (
-        <details className="plan-panel">
-          <summary className="plan-summary-bar">
-            <div className="plan-summary-main">
-              <span aria-hidden="true" className="plan-toggle-icon" />
+        {currentConsent && currentConsent.status !== "generated" ? (
+          <section className="card stack consent-panel-nested">
+            <div className="split-header">
+              <div>
+                <h3>Submitted form</h3>
+                <p className="lede">Stored on the patient profile for reference and review history.</p>
+              </div>
+              <span className={getStatusTone(currentConsent.status)}>
+                {getAcupunctureConsentStatusLabel(currentConsent.status)}
+              </span>
             </div>
-            <div>
-              <h3>Submitted consent forms</h3>
-              <p>
-                {completedConsents.length} submitted consent form{completedConsents.length === 1 ? "" : "s"} stored on
-                this profile.
-              </p>
-            </div>
-          </summary>
-          <div className="plan-panel-body stack">
-            {completedConsents.map((consent) => (
-              <section className="card stack consent-panel-nested" key={consent.id}>
-                <div className="split-header">
-                  <div>
-                    <h3>{consent.patient_full_name || `${patient.first_name} ${patient.last_name}`}</h3>
-                    <p className="lede">Submitted {formatDateTime(consent.submitted_at)}</p>
-                  </div>
-                  <span className={getStatusTone(consent.status)}>
-                    {getAcupunctureConsentStatusLabel(consent.status)}
-                  </span>
-                </div>
-                <dl className="detail-list">
-                  <div>
-                    <dt>Date of birth</dt>
-                    <dd>{formatDate(consent.patient_date_of_birth)}</dd>
-                  </div>
-                  <div>
-                    <dt>Treatment explained</dt>
-                    <dd>{consent.understands_treatment ? "Yes" : "No"}</dd>
-                  </div>
-                  <div>
-                    <dt>Risks understood</dt>
-                    <dd>{consent.understands_risks ? "Yes" : "No"}</dd>
-                  </div>
-                  <div>
-                    <dt>Relevant history disclosed</dt>
-                    <dd>{consent.disclosed_relevant_history ? "Yes" : "No"}</dd>
-                  </div>
-                  <div>
-                    <dt>History notes</dt>
-                    <dd>{consent.history_notes || "No additional notes provided."}</dd>
-                  </div>
-                  <div>
-                    <dt>Further screening information</dt>
-                    <dd>{consent.screening_notes || "No further information provided."}</dd>
-                  </div>
-                  <div>
-                    <dt>Consent to treatment</dt>
-                    <dd>{consent.consent_to_treatment ? "Yes" : "No"}</dd>
-                  </div>
-                  <div>
-                    <dt>Signature</dt>
-                    <dd>{consent.signature_name || "Not recorded"}</dd>
-                  </div>
-                  <div>
-                    <dt>Diabetes</dt>
-                    <dd>{formatYesNo(consent.diabetes_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Epileptic seizure history</dt>
-                    <dd>{formatYesNo(consent.epileptic_seizure_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>History of fainting</dt>
-                    <dd>{formatYesNo(consent.fainted_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Heart problems</dt>
-                    <dd>{formatYesNo(consent.heart_problem_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Pacemaker / electrical implant</dt>
-                    <dd>{formatYesNo(consent.pacemaker_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Circulation / clotting problems</dt>
-                    <dd>{formatYesNo(consent.circulation_problem_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Anticoagulation therapy</dt>
-                    <dd>{formatYesNo(consent.anticoagulation_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Cancer history</dt>
-                    <dd>{formatYesNo(consent.cancer_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Blood borne viruses</dt>
-                    <dd>{formatYesNo(consent.blood_borne_virus_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Allergies to metal or alcohol wipes</dt>
-                    <dd>{formatYesNo(consent.allergy_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Pregnant / trying to conceive</dt>
-                    <dd>{formatYesNo(consent.pregnant_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Needle phobia</dt>
-                    <dd>{formatYesNo(consent.needle_phobia_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Prior adverse effect to needling</dt>
-                    <dd>{formatYesNo(consent.prior_needling_adverse_effect_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Eaten within 2 hours</dt>
-                    <dd>{formatYesNo(consent.eaten_within_two_hours_response)}</dd>
-                  </div>
-                  <div>
-                    <dt>Clinician review notes</dt>
-                    <dd>{consent.clinician_review_notes || "No clinician review notes recorded."}</dd>
-                  </div>
-                </dl>
-              </section>
-            ))}
-          </div>
-        </details>
-      ) : null}
-    </>
+            <dl className="detail-list">
+              <div>
+                <dt>Date of birth</dt>
+                <dd>{formatDate(currentConsent.patient_date_of_birth)}</dd>
+              </div>
+              <div>
+                <dt>Treatment explained</dt>
+                <dd>{currentConsent.understands_treatment ? "Yes" : "No"}</dd>
+              </div>
+              <div>
+                <dt>Risks understood</dt>
+                <dd>{currentConsent.understands_risks ? "Yes" : "No"}</dd>
+              </div>
+              <div>
+                <dt>Relevant history disclosed</dt>
+                <dd>{currentConsent.disclosed_relevant_history ? "Yes" : "No"}</dd>
+              </div>
+              <div>
+                <dt>History notes</dt>
+                <dd>{currentConsent.history_notes || "No additional notes provided."}</dd>
+              </div>
+              <div>
+                <dt>Further screening information</dt>
+                <dd>{currentConsent.screening_notes || "No further information provided."}</dd>
+              </div>
+              <div>
+                <dt>Consent to treatment</dt>
+                <dd>{currentConsent.consent_to_treatment ? "Yes" : "No"}</dd>
+              </div>
+              <div>
+                <dt>Signature</dt>
+                <dd>{currentConsent.signature_name || "Not recorded"}</dd>
+              </div>
+              <div>
+                <dt>Diabetes</dt>
+                <dd>{formatYesNo(currentConsent.diabetes_response)}</dd>
+              </div>
+              <div>
+                <dt>Epileptic seizure history</dt>
+                <dd>{formatYesNo(currentConsent.epileptic_seizure_response)}</dd>
+              </div>
+              <div>
+                <dt>History of fainting</dt>
+                <dd>{formatYesNo(currentConsent.fainted_response)}</dd>
+              </div>
+              <div>
+                <dt>Heart problems</dt>
+                <dd>{formatYesNo(currentConsent.heart_problem_response)}</dd>
+              </div>
+              <div>
+                <dt>Pacemaker / electrical implant</dt>
+                <dd>{formatYesNo(currentConsent.pacemaker_response)}</dd>
+              </div>
+              <div>
+                <dt>Circulation / clotting problems</dt>
+                <dd>{formatYesNo(currentConsent.circulation_problem_response)}</dd>
+              </div>
+              <div>
+                <dt>Anticoagulation therapy</dt>
+                <dd>{formatYesNo(currentConsent.anticoagulation_response)}</dd>
+              </div>
+              <div>
+                <dt>Cancer history</dt>
+                <dd>{formatYesNo(currentConsent.cancer_response)}</dd>
+              </div>
+              <div>
+                <dt>Blood borne viruses</dt>
+                <dd>{formatYesNo(currentConsent.blood_borne_virus_response)}</dd>
+              </div>
+              <div>
+                <dt>Allergies to metal or alcohol wipes</dt>
+                <dd>{formatYesNo(currentConsent.allergy_response)}</dd>
+              </div>
+              <div>
+                <dt>Pregnant / trying to conceive</dt>
+                <dd>{formatYesNo(currentConsent.pregnant_response)}</dd>
+              </div>
+              <div>
+                <dt>Needle phobia</dt>
+                <dd>{formatYesNo(currentConsent.needle_phobia_response)}</dd>
+              </div>
+              <div>
+                <dt>Prior adverse effect to needling</dt>
+                <dd>{formatYesNo(currentConsent.prior_needling_adverse_effect_response)}</dd>
+              </div>
+              <div>
+                <dt>Eaten within 2 hours</dt>
+                <dd>{formatYesNo(currentConsent.eaten_within_two_hours_response)}</dd>
+              </div>
+              <div>
+                <dt>Clinician review notes</dt>
+                <dd>{currentConsent.clinician_review_notes || "No clinician review notes recorded."}</dd>
+              </div>
+            </dl>
+          </section>
+        ) : null}
+      </div>
+    </details>
   );
 }

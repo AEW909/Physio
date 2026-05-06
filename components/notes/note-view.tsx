@@ -661,7 +661,10 @@ export function NoteView({ note, patient }: NoteViewProps) {
               </summary>
               <div className="note-section-body stack">
                 <div className="note-form-grid">
-                  <NoteTextarea autoFocus label="HPC" name="history.hpc" defaultValue={asString(history.hpc)} rows={5} />
+                  <NoteTextarea autoFocus label="PC" name="history.pc" defaultValue={asString(history.pc)} rows={4} />
+                  <NoteTextarea label="HPC" name="history.hpc" defaultValue={asString(history.hpc)} rows={5} />
+                </div>
+                <div className="note-form-grid">
                   <NoteTextarea
                     label="Social history"
                     name="history.social_history"

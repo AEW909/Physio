@@ -204,6 +204,7 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
   if (noteType === "initial_assessment") {
     return {
       history: {
+        pc: getValue(formData, "history.pc"),
         hpc: getValue(formData, "history.hpc"),
         onset_pattern: getList(formData, "history.onset_pattern"),
         investigations: getList(formData, "history.investigations"),
@@ -617,6 +618,7 @@ function summarizeInitialAssessmentContent(content: Record<string, unknown>) {
   const plan = asRecord(content.plan);
 
   return [
+    `PC: ${asString(history.pc) || "Not recorded"}`,
     `HPC: ${asString(history.hpc) || "Not recorded"}`,
     `Pain rating (NPRS): Best ${asString(history.nprs_best) || "not recorded"}, Current ${asString(history.nprs_current) || asString(history.nprs) || "not recorded"}, Worst ${asString(history.nprs_worst) || "not recorded"}`,
     `Diurnal pattern: ${asString(history.diurnal_pattern) || "Not recorded"}`,

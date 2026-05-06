@@ -1284,6 +1284,10 @@ a {
   background: rgba(255, 255, 255, 0.6);
 }
 
+.consent-review-actions {
+  margin-top: 8px;
+}
+
 .stack > *:first-child {
   margin-top: 0;
 }
