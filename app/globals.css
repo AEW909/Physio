@@ -1288,6 +1288,75 @@ a {
   margin-top: 8px;
 }
 
+.body-map-card {
+  margin-top: 18px;
+}
+
+.body-map-actions {
+  gap: 8px;
+}
+
+.body-map-icon-button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  justify-content: center;
+}
+
+.body-map-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.body-map-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.body-map-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.body-map-label {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.body-map-canvas {
+  position: relative;
+  width: 100%;
+  min-height: 340px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 247, 245, 0.9));
+  color: var(--brand-deep);
+  padding: 18px;
+  cursor: crosshair;
+}
+
+.body-map-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.body-map-mark {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #a53b4d;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
 .stack > *:first-child {
   margin-top: 0;
 }
@@ -1327,6 +1396,10 @@ a {
   }
 
   .consent-question-row {
+    grid-template-columns: 1fr;
+  }
+
+  .body-map-grid {
     grid-template-columns: 1fr;
   }
 

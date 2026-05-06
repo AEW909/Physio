@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { updateNoteAction } from "@/app/notes/actions";
@@ -43,6 +43,34 @@ function asStringArray(value: unknown) {
 
 function asBoolean(value: unknown) {
   return value === true;
+}
+
+type BodyMapMark = {
+  view: "front" | "side";
+  x: number;
+  y: number;
+};
+
+function asBodyMapMarks(value: unknown): BodyMapMark[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+      const record = item as Record<string, unknown>;
+      const view = record.view === "front" || record.view === "side" ? record.view : null;
+      const x = typeof record.x === "number" ? record.x : Number(record.x);
+      const y = typeof record.y === "number" ? record.y : Number(record.y);
+
+      if (!view || Number.isNaN(x) || Number.isNaN(y)) return null;
+
+      return {
+        view,
+        x: Math.max(0, Math.min(100, x)),
+        y: Math.max(0, Math.min(100, y)),
+      };
+    })
+    .filter((item): item is BodyMapMark => Boolean(item));
 }
 
 function splitStoredMedicalHistory(values: string[]) {
@@ -217,6 +245,128 @@ function SummaryPrompt({
   );
 }
 
+function BodyFigure({ view }: { view: "front" | "side" }) {
+  return (
+    <img
+      alt=""
+      aria-hidden="true"
+      className="body-map-image"
+      draggable={false}
+      src={view === "front" ? "/body-map/front.png" : "/body-map/side.png"}
+    />
+  );
+}
+
+function IconButton({
+  children,
+  label,
+  onClick,
+}: {
+  children: ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-label={label}
+      className="button button-secondary button-small body-map-icon-button"
+      onClick={onClick}
+      type="button"
+      title={label}
+    >
+      {children}
+    </button>
+  );
+}
+
+function BodyMapField({
+  defaultValue,
+  name,
+}: {
+  defaultValue: BodyMapMark[];
+  name: string;
+}) {
+  const [marks, setMarks] = useState<BodyMapMark[]>(defaultValue);
+
+  function addMark(event: React.MouseEvent<HTMLButtonElement>, view: "front" | "side") {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    setMarks((current) => [
+      ...current,
+      {
+        view,
+        x: Math.max(0, Math.min(100, Number(x.toFixed(2)))),
+        y: Math.max(0, Math.min(100, Number(y.toFixed(2)))),
+      },
+    ]);
+  }
+
+  function undoLastMark() {
+    setMarks((current) => current.slice(0, -1));
+  }
+
+  function clearMarks() {
+    setMarks([]);
+  }
+
+  return (
+    <section className="card stack note-card note-card-wide body-map-card">
+      <div className="split-header">
+        <div>
+          <h3>Site of injury</h3>
+          <p className="lede">Tap or click the front or side figure to place an X. Use the icons to undo the last mark or clear the map.</p>
+        </div>
+        <div className="workspace-actions body-map-actions">
+          <IconButton label="Undo last mark" onClick={undoLastMark}>
+            <svg aria-hidden="true" className="body-map-icon" viewBox="0 0 24 24">
+              <path d="M9 7 L4 12 L9 17" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              <path d="M5 12 H13 C17 12 20 15 20 19" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+            </svg>
+          </IconButton>
+          <IconButton label="Clear all marks" onClick={clearMarks}>
+            <svg aria-hidden="true" className="body-map-icon" viewBox="0 0 24 24">
+              <path d="M6 7 H18" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+              <path d="M9 7 V5 H15 V7" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+              <path d="M8 7 L9 19 H15 L16 7" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+            </svg>
+          </IconButton>
+        </div>
+      </div>
+
+      <input name={name} type="hidden" value={JSON.stringify(marks)} />
+
+      <div className="body-map-grid">
+        {(["front", "side"] as const).map((view) => (
+          <div className="body-map-panel" key={view}>
+            <p className="body-map-label">{view === "front" ? "Front view" : "Side view"}</p>
+            <button
+              className="body-map-canvas"
+              onClick={(event) => addMark(event, view)}
+              type="button"
+            >
+              <BodyFigure view={view} />
+              {marks
+                .filter((mark) => mark.view === view)
+                .map((mark, index) => (
+                  <span
+                    aria-hidden="true"
+                    className="body-map-mark"
+                    key={`${view}-${index}-${mark.x}-${mark.y}`}
+                    style={{ left: `${mark.x}%`, top: `${mark.y}%` }}
+                  >
+                    X
+                  </span>
+                ))}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function NoteView({ note, patient }: NoteViewProps) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(updateNoteAction, initialState);
@@ -274,6 +424,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
     ]
       .filter(Boolean)
       .join("\n");
+  const bodyMapMarks = asBodyMapMarks(objective.body_map_marks);
   const nprsBest = asString(history.nprs_best);
   const nprsCurrent = asString(history.nprs_current) || asString(history.nprs);
   const nprsWorst = asString(history.nprs_worst);
@@ -793,6 +944,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
                   />
                   <NoteTextarea label="Other" name="objective.other" defaultValue={asString(objective.other)} rows={3} />
                 </div>
+                <BodyMapField defaultValue={bodyMapMarks} name="objective.body_map_marks" />
               </div>
             </details>
 
