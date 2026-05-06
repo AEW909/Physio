@@ -1308,28 +1308,10 @@ a {
   height: 18px;
 }
 
-.body-map-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.body-map-panel {
-  display: grid;
-  gap: 10px;
-}
-
-.body-map-label {
-  margin: 0;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--muted);
-}
-
 .body-map-canvas {
   position: relative;
   width: 100%;
-  min-height: 340px;
+  min-height: 420px;
   border: 1px solid var(--line);
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 247, 245, 0.9));
@@ -1338,13 +1320,30 @@ a {
   cursor: crosshair;
 }
 
-.body-map-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  user-select: none;
+.body-map-canvas-combined {
+  overflow: hidden;
+}
+
+.body-map-figure-strip {
+  position: absolute;
+  inset: 18px;
+  display: grid;
+  grid-template-columns: 0.26fr 0.48fr 0.26fr;
+  align-items: end;
+  gap: 10px;
   pointer-events: none;
+}
+
+.body-map-figure {
+  width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  align-self: end;
+  user-select: none;
+}
+
+.body-map-figure-side-mirrored {
+  transform: scaleX(-1);
 }
 
 .body-map-mark {
@@ -1399,8 +1398,8 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .body-map-grid {
-    grid-template-columns: 1fr;
+  .body-map-canvas {
+    min-height: 340px;
   }
 
   .plan-summary-meta {

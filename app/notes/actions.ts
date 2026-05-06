@@ -227,6 +227,7 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         diurnal_pattern: getValue(formData, "history.diurnal_pattern"),
         aggravating_factors: getValue(formData, "history.aggravating_factors"),
         easing_factors: getValue(formData, "history.easing_factors"),
+        body_map_marks: getJsonValue(formData, "history.body_map_marks", [] as Array<{ x: number; y: number }>),
       },
       medical_history: getMedicalHistory(formData),
       special_questions: {
@@ -269,7 +270,6 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         special_tests: getValue(formData, "objective.special_tests"),
         palpation: getValue(formData, "objective.palpation"),
         neuro_screen: getValue(formData, "objective.neuro_screen"),
-        body_map_marks: getJsonValue(formData, "objective.body_map_marks", [] as Array<{ view: "front" | "side"; x: number; y: number }>),
       },
       impression: {
         opinion: getValue(formData, "impression.opinion"),

@@ -46,7 +46,6 @@ function asBoolean(value: unknown) {
 }
 
 type BodyMapMark = {
-  view: "front" | "side";
   x: number;
   y: number;
 };
@@ -58,14 +57,26 @@ function asBodyMapMarks(value: unknown): BodyMapMark[] {
     .map((item) => {
       if (!item || typeof item !== "object" || Array.isArray(item)) return null;
       const record = item as Record<string, unknown>;
-      const view = record.view === "front" || record.view === "side" ? record.view : null;
       const x = typeof record.x === "number" ? record.x : Number(record.x);
       const y = typeof record.y === "number" ? record.y : Number(record.y);
 
-      if (!view || Number.isNaN(x) || Number.isNaN(y)) return null;
+      if (Number.isNaN(x) || Number.isNaN(y)) return null;
+
+      if (record.view === "front") {
+        return {
+          x: Math.max(0, Math.min(100, Number((34 + x * 0.32).toFixed(2)))),
+          y: Math.max(0, Math.min(100, y)),
+        };
+      }
+
+      if (record.view === "side") {
+        return {
+          x: Math.max(0, Math.min(100, Number((76 + x * 0.22).toFixed(2)))),
+          y: Math.max(0, Math.min(100, y)),
+        };
+      }
 
       return {
-        view,
         x: Math.max(0, Math.min(100, x)),
         y: Math.max(0, Math.min(100, y)),
       };
@@ -245,18 +256,6 @@ function SummaryPrompt({
   );
 }
 
-function BodyFigure({ view }: { view: "front" | "side" }) {
-  return (
-    <img
-      alt=""
-      aria-hidden="true"
-      className="body-map-image"
-      draggable={false}
-      src={view === "front" ? "/body-map/front.png" : "/body-map/side.png"}
-    />
-  );
-}
-
 function IconButton({
   children,
   label,
@@ -288,7 +287,7 @@ function BodyMapField({
 }) {
   const [marks, setMarks] = useState<BodyMapMark[]>(defaultValue);
 
-  function addMark(event: React.MouseEvent<HTMLButtonElement>, view: "front" | "side") {
+  function addMark(event: React.MouseEvent<HTMLButtonElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
@@ -296,7 +295,6 @@ function BodyMapField({
     setMarks((current) => [
       ...current,
       {
-        view,
         x: Math.max(0, Math.min(100, Number(x.toFixed(2)))),
         y: Math.max(0, Math.min(100, Number(y.toFixed(2)))),
       },
@@ -316,7 +314,7 @@ function BodyMapField({
       <div className="split-header">
         <div>
           <h3>Site of injury</h3>
-          <p className="lede">Tap or click the front or side figure to place an X. Use the icons to undo the last mark or clear the map.</p>
+          <p className="lede">Tap or click the body map to place an X. Use the icons to undo the last mark or clear the map.</p>
         </div>
         <div className="workspace-actions body-map-actions">
           <IconButton label="Undo last mark" onClick={undoLastMark}>
@@ -337,32 +335,28 @@ function BodyMapField({
 
       <input name={name} type="hidden" value={JSON.stringify(marks)} />
 
-      <div className="body-map-grid">
-        {(["front", "side"] as const).map((view) => (
-          <div className="body-map-panel" key={view}>
-            <p className="body-map-label">{view === "front" ? "Front view" : "Side view"}</p>
-            <button
-              className="body-map-canvas"
-              onClick={(event) => addMark(event, view)}
-              type="button"
-            >
-              <BodyFigure view={view} />
-              {marks
-                .filter((mark) => mark.view === view)
-                .map((mark, index) => (
-                  <span
-                    aria-hidden="true"
-                    className="body-map-mark"
-                    key={`${view}-${index}-${mark.x}-${mark.y}`}
-                    style={{ left: `${mark.x}%`, top: `${mark.y}%` }}
-                  >
-                    X
-                  </span>
-                ))}
-            </button>
-          </div>
+      <button className="body-map-canvas body-map-canvas-combined" onClick={addMark} type="button">
+        <div aria-hidden="true" className="body-map-figure-strip">
+          <img alt="" className="body-map-figure body-map-figure-side" draggable={false} src="/body-map/side.png" />
+          <img alt="" className="body-map-figure body-map-figure-front" draggable={false} src="/body-map/front.png" />
+          <img
+            alt=""
+            className="body-map-figure body-map-figure-side body-map-figure-side-mirrored"
+            draggable={false}
+            src="/body-map/side.png"
+          />
+        </div>
+        {marks.map((mark, index) => (
+          <span
+            aria-hidden="true"
+            className="body-map-mark"
+            key={`body-map-${index}-${mark.x}-${mark.y}`}
+            style={{ left: `${mark.x}%`, top: `${mark.y}%` }}
+          >
+            X
+          </span>
         ))}
-      </div>
+      </button>
     </section>
   );
 }
@@ -424,7 +418,9 @@ export function NoteView({ note, patient }: NoteViewProps) {
     ]
       .filter(Boolean)
       .join("\n");
-  const bodyMapMarks = asBodyMapMarks(objective.body_map_marks);
+  const bodyMapMarks = asBodyMapMarks(history.body_map_marks).length
+    ? asBodyMapMarks(history.body_map_marks)
+    : asBodyMapMarks(objective.body_map_marks);
   const nprsBest = asString(history.nprs_best);
   const nprsCurrent = asString(history.nprs_current) || asString(history.nprs);
   const nprsWorst = asString(history.nprs_worst);
@@ -729,6 +725,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     rows={3}
                   />
                 </div>
+                <BodyMapField defaultValue={bodyMapMarks} name="history.body_map_marks" />
                 <div className="note-form-grid">
                   <BooleanGrid
                     legend="Red flags and special questions"
@@ -944,7 +941,6 @@ export function NoteView({ note, patient }: NoteViewProps) {
                   />
                   <NoteTextarea label="Other" name="objective.other" defaultValue={asString(objective.other)} rows={3} />
                 </div>
-                <BodyMapField defaultValue={bodyMapMarks} name="objective.body_map_marks" />
               </div>
             </details>
 

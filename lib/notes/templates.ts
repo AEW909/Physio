@@ -91,6 +91,7 @@ export function createInitialAssessmentContent() {
       diurnal_pattern: "",
       aggravating_factors: "",
       easing_factors: "",
+      body_map_marks: [] as Array<{ x: number; y: number }>,
     },
     medical_history: {
       past_medical_history: [] as string[],
@@ -146,7 +147,6 @@ export function createInitialAssessmentContent() {
       dermatomes: "",
       reflexes: "",
       slr: "",
-      body_map_marks: [] as Array<{ view: "front" | "side"; x: number; y: number }>,
     },
     impression: {
       opinion: "",
