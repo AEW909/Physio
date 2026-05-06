@@ -1,0 +1,16 @@
+alter table public.acupuncture_consents
+  add column if not exists diabetes_response text check (diabetes_response in ('yes', 'no')),
+  add column if not exists epileptic_seizure_response text check (epileptic_seizure_response in ('yes', 'no')),
+  add column if not exists fainted_response text check (fainted_response in ('yes', 'no')),
+  add column if not exists heart_problem_response text check (heart_problem_response in ('yes', 'no')),
+  add column if not exists pacemaker_response text check (pacemaker_response in ('yes', 'no')),
+  add column if not exists circulation_problem_response text check (circulation_problem_response in ('yes', 'no')),
+  add column if not exists anticoagulation_response text check (anticoagulation_response in ('yes', 'no')),
+  add column if not exists cancer_response text check (cancer_response in ('yes', 'no')),
+  add column if not exists blood_borne_virus_response text check (blood_borne_virus_response in ('yes', 'no')),
+  add column if not exists allergy_response text check (allergy_response in ('yes', 'no')),
+  add column if not exists pregnant_response text check (pregnant_response in ('yes', 'no')),
+  add column if not exists needle_phobia_response text check (needle_phobia_response in ('yes', 'no')),
+  add column if not exists prior_needling_adverse_effect_response text check (prior_needling_adverse_effect_response in ('yes', 'no')),
+  add column if not exists eaten_within_two_hours_response text check (eaten_within_two_hours_response in ('yes', 'no')),
+  add column if not exists screening_notes text;

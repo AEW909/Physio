@@ -13,6 +13,10 @@ export type AcupunctureConsentSubmitState = {
   success?: string;
 };
 
+const yesNoEnum = z.enum(["yes", "no"], {
+  errorMap: () => ({ message: "Please answer all of the health screening questions." }),
+});
+
 const consentSubmissionSchema = z.object({
   token: z.string().min(20, "Consent token is missing."),
   patientFullName: z.string().trim().min(1, "Enter your full name."),
@@ -30,6 +34,21 @@ const consentSubmissionSchema = z.object({
   consentToTreatment: z.literal("on", {
     errorMap: () => ({ message: "Please confirm your consent to acupuncture treatment." }),
   }),
+  diabetesResponse: yesNoEnum,
+  epilepticSeizureResponse: yesNoEnum,
+  faintedResponse: yesNoEnum,
+  heartProblemResponse: yesNoEnum,
+  pacemakerResponse: yesNoEnum,
+  circulationProblemResponse: yesNoEnum,
+  anticoagulationResponse: yesNoEnum,
+  cancerResponse: yesNoEnum,
+  bloodBorneVirusResponse: yesNoEnum,
+  allergyResponse: yesNoEnum,
+  pregnantResponse: yesNoEnum,
+  needlePhobiaResponse: yesNoEnum,
+  priorNeedlingAdverseEffectResponse: yesNoEnum,
+  eatenWithinTwoHoursResponse: yesNoEnum,
+  screeningNotes: z.string().trim().optional(),
   signatureName: z.string().trim().min(1, "Enter your typed signature."),
 });
 
@@ -96,6 +115,21 @@ export async function submitAcupunctureConsentAction(
     disclosedRelevantHistory: getCheckboxValue(formData, "disclosedRelevantHistory"),
     historyNotes: getValue(formData, "historyNotes"),
     consentToTreatment: getCheckboxValue(formData, "consentToTreatment"),
+    diabetesResponse: getValue(formData, "diabetesResponse"),
+    epilepticSeizureResponse: getValue(formData, "epilepticSeizureResponse"),
+    faintedResponse: getValue(formData, "faintedResponse"),
+    heartProblemResponse: getValue(formData, "heartProblemResponse"),
+    pacemakerResponse: getValue(formData, "pacemakerResponse"),
+    circulationProblemResponse: getValue(formData, "circulationProblemResponse"),
+    anticoagulationResponse: getValue(formData, "anticoagulationResponse"),
+    cancerResponse: getValue(formData, "cancerResponse"),
+    bloodBorneVirusResponse: getValue(formData, "bloodBorneVirusResponse"),
+    allergyResponse: getValue(formData, "allergyResponse"),
+    pregnantResponse: getValue(formData, "pregnantResponse"),
+    needlePhobiaResponse: getValue(formData, "needlePhobiaResponse"),
+    priorNeedlingAdverseEffectResponse: getValue(formData, "priorNeedlingAdverseEffectResponse"),
+    eatenWithinTwoHoursResponse: getValue(formData, "eatenWithinTwoHoursResponse"),
+    screeningNotes: getValue(formData, "screeningNotes"),
     signatureName: getValue(formData, "signatureName"),
   });
 
@@ -138,6 +172,21 @@ export async function submitAcupunctureConsentAction(
       disclosed_relevant_history: true,
       history_notes: parsed.data.historyNotes || null,
       consent_to_treatment: true,
+      diabetes_response: parsed.data.diabetesResponse,
+      epileptic_seizure_response: parsed.data.epilepticSeizureResponse,
+      fainted_response: parsed.data.faintedResponse,
+      heart_problem_response: parsed.data.heartProblemResponse,
+      pacemaker_response: parsed.data.pacemakerResponse,
+      circulation_problem_response: parsed.data.circulationProblemResponse,
+      anticoagulation_response: parsed.data.anticoagulationResponse,
+      cancer_response: parsed.data.cancerResponse,
+      blood_borne_virus_response: parsed.data.bloodBorneVirusResponse,
+      allergy_response: parsed.data.allergyResponse,
+      pregnant_response: parsed.data.pregnantResponse,
+      needle_phobia_response: parsed.data.needlePhobiaResponse,
+      prior_needling_adverse_effect_response: parsed.data.priorNeedlingAdverseEffectResponse,
+      eaten_within_two_hours_response: parsed.data.eatenWithinTwoHoursResponse,
+      screening_notes: parsed.data.screeningNotes || null,
       signature_name: parsed.data.signatureName,
       status: "submitted",
       submitted_at: new Date().toISOString(),
