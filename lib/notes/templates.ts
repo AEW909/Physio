@@ -177,7 +177,9 @@ export function createInitialAssessmentContent() {
 export function createFollowUpContent() {
   return {
     subjective_update: "",
-    nprs: "",
+    nprs_best: "",
+    nprs_current: "",
+    nprs_worst: "",
     response_to_previous_treatment: "",
     objective_reassessment: "",
     treatment_today: "",

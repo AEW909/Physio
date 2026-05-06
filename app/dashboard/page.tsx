@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
+import { AcupunctureConsentQueue } from "@/components/dashboard/acupuncture-consent-queue";
 import { getCurrentProfile, requireRole } from "@/lib/auth/session";
 import { getDashboardData } from "@/lib/dashboard/queries";
 
@@ -205,6 +206,8 @@ export default async function DashboardPage() {
             </p>
           )}
         </article>
+
+        <AcupunctureConsentQueue items={dashboard.outstandingAcupunctureConsents} />
       </section>
     </AppShell>
   );

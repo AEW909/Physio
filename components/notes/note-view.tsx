@@ -277,6 +277,9 @@ export function NoteView({ note, patient }: NoteViewProps) {
   const nprsBest = asString(history.nprs_best);
   const nprsCurrent = asString(history.nprs_current) || asString(history.nprs);
   const nprsWorst = asString(history.nprs_worst);
+  const followUpNprsBest = asString(content.nprs_best);
+  const followUpNprsCurrent = asString(content.nprs_current) || asString(content.nprs);
+  const followUpNprsWorst = asString(content.nprs_worst);
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLFormElement>) {
     if (event.key !== "Enter") return;
@@ -717,9 +720,9 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     options={SPECIAL_QUESTION_OPTIONS}
                     values={specialQuestions}
                   />
-                  <fieldset className="checkbox-panel note-checkbox-panel">
+                  <fieldset className="checkbox-panel note-checkbox-panel note-checkbox-panel-compact">
                     <legend>Pins &amp; needles</legend>
-                    <div className="note-checkbox-grid note-checkbox-grid-compact">
+                    <div className="note-checkbox-grid note-checkbox-grid-compact note-checkbox-grid-inline">
                       <label className="note-check">
                         <input
                           defaultChecked={
@@ -864,7 +867,11 @@ export function NoteView({ note, patient }: NoteViewProps) {
                 defaultValue={asString(content.subjective_update)}
                 rows={4}
               />
-              <NprsSelect label="NPRS current" name="nprs" defaultValue={asString(content.nprs)} />
+              <div className="note-form-grid note-form-grid-nprs">
+                <NprsSelect label="NPRS best" name="nprs_best" defaultValue={followUpNprsBest} />
+                <NprsSelect label="NPRS current" name="nprs_current" defaultValue={followUpNprsCurrent} />
+                <NprsSelect label="NPRS worst" name="nprs_worst" defaultValue={followUpNprsWorst} />
+              </div>
               <NoteTextarea
                 label="Response to previous treatment"
                 name="response_to_previous_treatment"

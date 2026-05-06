@@ -11,13 +11,14 @@ export function PatientSearch({ initialQuery, status, sort }: PatientSearchProps
       <input name="sort" type="hidden" value={sort} />
       <input
         aria-label="Search patients"
+        className="patient-search-input"
         defaultValue={initialQuery}
         name="search"
         placeholder="Search by name, email, or phone"
         type="search"
       />
-      <button className="button button-secondary" type="submit">
-        Search
+      <button aria-label="Search patients" className="button button-secondary patient-search-button" type="submit">
+        <span aria-hidden="true">⌕</span>
       </button>
     </form>
   );

@@ -12,6 +12,7 @@ const PUBLIC_PATHS = new Set(["/", "/login", "/forgot-password", "/reset-passwor
 function isPublicPath(pathname: string) {
   if (PUBLIC_PATHS.has(pathname)) return true;
   if (pathname.startsWith("/auth")) return true;
+  if (pathname.startsWith("/consents/acupuncture/")) return true;
   if (pathname.startsWith("/api/health")) return true;
   if (pathname.startsWith("/_next")) return true;
   return false;

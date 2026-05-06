@@ -276,7 +276,9 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
   if (noteType === "follow_up") {
     return {
       subjective_update: getValue(formData, "subjective_update"),
-      nprs: getValue(formData, "nprs"),
+      nprs_best: getValue(formData, "nprs_best"),
+      nprs_current: getValue(formData, "nprs_current"),
+      nprs_worst: getValue(formData, "nprs_worst"),
       response_to_previous_treatment: getValue(formData, "response_to_previous_treatment"),
       objective_reassessment: getValue(formData, "objective_reassessment"),
       treatment_today: getValue(formData, "treatment_today"),
@@ -598,7 +600,7 @@ function asStringArray(value: unknown) {
 function summarizeFollowUpContent(content: Record<string, unknown>) {
   return [
     `Subjective update: ${asString(content.subjective_update) || "Not recorded"}`,
-    `Pain rating (NPRS): ${asString(content.nprs) || "Not recorded"}`,
+    `Pain rating (NPRS): Best ${asString(content.nprs_best) || "not recorded"}, Current ${asString(content.nprs_current) || asString(content.nprs) || "not recorded"}, Worst ${asString(content.nprs_worst) || "not recorded"}`,
     `Response to previous treatment: ${asString(content.response_to_previous_treatment) || "Not recorded"}`,
     `Objective reassessment: ${asString(content.objective_reassessment) || "Not recorded"}`,
     `Treatment today: ${asString(content.treatment_today) || "Not recorded"}`,

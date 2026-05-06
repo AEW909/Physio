@@ -9,11 +9,17 @@ export function ChangePasswordForm() {
   const [pending, setPending] = useState(false);
 
   async function handleSubmit(formData: FormData) {
+    const currentPassword = String(formData.get("currentPassword") ?? "");
     const password = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
     setError("");
     setSuccess("");
+
+    if (!currentPassword) {
+      setError("Enter your current password before choosing a new one.");
+      return;
+    }
 
     if (password.length < 8) {
       setError("Use at least 8 characters for the new password.");
@@ -29,6 +35,23 @@ export function ChangePasswordForm() {
 
     try {
       const supabase = createSupabaseBrowserClient();
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !userData.user?.email) {
+        setError(userError?.message ?? "We couldn't verify the current account.");
+        return;
+      }
+
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: userData.user.email,
+        password: currentPassword,
+      });
+
+      if (verifyError) {
+        setError("Your current password is incorrect.");
+        return;
+      }
+
       const { error: updateError } = await supabase.auth.updateUser({
         password,
       });
@@ -46,6 +69,11 @@ export function ChangePasswordForm() {
 
   return (
     <form action={handleSubmit} className="auth-form">
+      <label className="field">
+        <span>Current password</span>
+        <input name="currentPassword" type="password" autoComplete="current-password" required />
+      </label>
+
       <label className="field">
         <span>New password</span>
         <input name="password" type="password" autoComplete="new-password" required minLength={8} />

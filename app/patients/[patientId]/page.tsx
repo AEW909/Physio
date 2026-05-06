@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
+import { AcupunctureConsentPanel } from "@/components/patients/acupuncture-consent-panel";
 import { ArchiveToggleForm } from "@/components/patients/archive-toggle-form";
 import { PatientNextModuleSlots } from "@/components/patients/patient-next-module-slots";
 import { PatientSummary } from "@/components/patients/patient-summary";
 import { TreatmentPlanList } from "@/components/treatment-plans/treatment-plan-list";
+import { listAcupunctureConsentsForPatient } from "@/lib/acupuncture-consents/queries";
 import { getCurrentProfile, requireRole } from "@/lib/auth/session";
 import { getPatient } from "@/lib/patients/queries";
 import { listTreatmentPlansForPatient } from "@/lib/treatment-plans/queries";
@@ -24,6 +26,7 @@ export default async function PatientDetailPage({ params }: PatientDetailPagePro
   const patient = await getPatient(patientId);
   const treatmentPlans = await listTreatmentPlansForPatient(patient.id, "active");
   const archivedTreatmentPlans = await listTreatmentPlansForPatient(patient.id, "archived");
+  const acupunctureConsents = await listAcupunctureConsentsForPatient(patient.id);
 
   return (
     <AppShell
@@ -53,6 +56,7 @@ export default async function PatientDetailPage({ params }: PatientDetailPagePro
         ) : null}
       </div>
       <PatientSummary patient={patient} />
+      <AcupunctureConsentPanel consents={acupunctureConsents} patient={patient} />
       <TreatmentPlanList plans={treatmentPlans} />
       {archivedTreatmentPlans.length ? (
         <details className="plan-panel">

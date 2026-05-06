@@ -379,9 +379,15 @@ a {
 .select-field {
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: var(--surface-strong);
+  appearance: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 247, 245, 0.92)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5L7 7.5L13 1.5' fill='none' stroke='%231f6b6d' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, right 14px center;
+  background-size: auto, 14px 9px;
   color: var(--ink);
-  padding: 14px 16px;
+  padding: 14px 42px 14px 16px;
 }
 
 .field textarea {
@@ -478,7 +484,16 @@ a {
 
 .topbar-home-link {
   min-height: 54px;
-  padding-inline: 16px;
+  min-width: 54px;
+  padding-inline: 14px;
+}
+
+.topbar-home-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  line-height: 1;
 }
 
 .brand-lockup {
@@ -652,6 +667,21 @@ a {
   color: #8c3641;
 }
 
+.status-pill-warning {
+  background: rgba(185, 132, 37, 0.18);
+  color: #8e5e0d;
+}
+
+.status-pill-success {
+  background: rgba(96, 163, 108, 0.18);
+  color: #2d6b37;
+}
+
+.status-pill-alert {
+  background: rgba(176, 74, 86, 0.14);
+  color: #8c3641;
+}
+
 .workspace {
   display: grid;
   gap: 18px;
@@ -668,6 +698,16 @@ a {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+}
+
+.button-danger {
+  background: #8f3343;
+  color: #fff;
+  border-color: rgba(143, 51, 67, 0.9);
+}
+
+.button-danger:hover {
+  background: #7c2838;
 }
 
 .detail-grid {
@@ -880,6 +920,17 @@ a {
   background: var(--surface-strong);
   color: var(--ink);
   padding: 14px 18px;
+}
+
+.patient-search-input {
+  background: rgba(230, 241, 238, 0.92) !important;
+  border-color: rgba(42, 141, 143, 0.18) !important;
+}
+
+.patient-search-button {
+  min-width: 48px;
+  padding-inline: 0;
+  font-size: 1.1rem;
 }
 
 .detail-list {
@@ -1101,6 +1152,11 @@ a {
   min-width: 0;
 }
 
+.note-checkbox-panel-compact {
+  width: fit-content;
+  justify-self: start;
+}
+
 .note-checkbox-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1109,6 +1165,10 @@ a {
 
 .note-checkbox-grid-compact {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.note-checkbox-grid-inline {
+  grid-template-columns: repeat(2, minmax(0, max-content));
 }
 
 .note-checkbox-grid-dense {
@@ -1131,6 +1191,36 @@ a {
 .note-check-inline {
   align-items: center;
   font-weight: 700;
+}
+
+.public-consent-shell {
+  padding-top: 40px;
+  padding-bottom: 56px;
+}
+
+.consent-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(247, 250, 248, 0.82);
+  line-height: 1.45;
+}
+
+.consent-check input {
+  margin-top: 3px;
+}
+
+.consent-panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 18px;
+}
+
+.consent-panel-nested {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .stack > *:first-child {
@@ -1160,6 +1250,10 @@ a {
   }
 
   .plan-panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .consent-panel-grid {
     grid-template-columns: 1fr;
   }
 

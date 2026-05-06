@@ -46,7 +46,7 @@ export function TopNav({ profile }: TopNavProps) {
             href="/dashboard"
             title="Home"
           >
-            <span aria-hidden="true">⌂</span>
+            <span aria-hidden="true" className="topbar-home-icon">⌂</span>
           </Link>
           <button
             aria-controls="primary-menu"

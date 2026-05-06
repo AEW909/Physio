@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { listOutstandingAcupunctureConsents } from "@/lib/acupuncture-consents/queries";
+import type { AcupunctureConsentWithPatient } from "@/lib/acupuncture-consents/types";
 
 type CaseloadCounts = {
   activePatients: number;
@@ -50,6 +52,7 @@ export type DashboardData = {
   recentPatients: DashboardPatientItem[];
   activePlans: DashboardPlanItem[];
   draftNotes: DashboardDraftNoteItem[];
+  outstandingAcupunctureConsents: AcupunctureConsentWithPatient[];
 };
 
 export async function getDashboardData(currentUserId: string): Promise<DashboardData> {
@@ -184,6 +187,7 @@ export async function getDashboardData(currentUserId: string): Promise<Dashboard
     updated_at: string;
     patient_id: string;
   }>;
+  const outstandingAcupunctureConsents = await listOutstandingAcupunctureConsents(activePatientIds);
 
   return {
     caseload: {
@@ -212,5 +216,6 @@ export async function getDashboardData(currentUserId: string): Promise<Dashboard
       updated_at: row.updated_at,
       patient: patientLookup.get(row.patient_id) ?? null,
     })),
+    outstandingAcupunctureConsents,
   };
 }
