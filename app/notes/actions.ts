@@ -45,6 +45,17 @@ function getBoolean(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
+function getJsonValue<T>(formData: FormData, key: string, fallback: T): T {
+  const raw = getValue(formData, key);
+  if (!raw) return fallback;
+
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 function getList(formData: FormData, key: string) {
   return formData
     .getAll(key)
@@ -258,6 +269,7 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         special_tests: getValue(formData, "objective.special_tests"),
         palpation: getValue(formData, "objective.palpation"),
         neuro_screen: getValue(formData, "objective.neuro_screen"),
+        body_map_marks: getJsonValue(formData, "objective.body_map_marks", [] as Array<{ view: "front" | "side"; x: number; y: number }>),
       },
       impression: {
         opinion: getValue(formData, "impression.opinion"),

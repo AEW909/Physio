@@ -146,6 +146,7 @@ export function createInitialAssessmentContent() {
       dermatomes: "",
       reflexes: "",
       slr: "",
+      body_map_marks: [] as Array<{ view: "front" | "side"; x: number; y: number }>,
     },
     impression: {
       opinion: "",
