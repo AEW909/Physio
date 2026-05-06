@@ -310,7 +310,7 @@ function BodyMapField({
   }
 
   return (
-    <section className="card stack note-card note-card-wide body-map-card">
+    <section className="body-map-card stack">
       <div className="split-header">
         <div>
           <h3>Site of injury</h3>
@@ -336,16 +336,7 @@ function BodyMapField({
       <input name={name} type="hidden" value={JSON.stringify(marks)} />
 
       <button className="body-map-canvas body-map-canvas-combined" onClick={addMark} type="button">
-        <div aria-hidden="true" className="body-map-figure-strip">
-          <img alt="" className="body-map-figure body-map-figure-side" draggable={false} src="/body-map/side.png" />
-          <img alt="" className="body-map-figure body-map-figure-front" draggable={false} src="/body-map/front.png" />
-          <img
-            alt=""
-            className="body-map-figure body-map-figure-side body-map-figure-side-mirrored"
-            draggable={false}
-            src="/body-map/side.png"
-          />
-        </div>
+        <img alt="" aria-hidden="true" className="body-map-image" draggable={false} src="/body-map/combined.png" />
         {marks.map((mark, index) => (
           <span
             aria-hidden="true"

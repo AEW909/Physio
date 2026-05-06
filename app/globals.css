@@ -1290,6 +1290,12 @@ a {
 
 .body-map-card {
   margin-top: 18px;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(247, 250, 248, 0.82);
 }
 
 .body-map-actions {
@@ -1310,6 +1316,7 @@ a {
 
 .body-map-canvas {
   position: relative;
+  display: block;
   width: 100%;
   min-height: 420px;
   border: 1px solid var(--line);
@@ -1324,26 +1331,13 @@ a {
   overflow: hidden;
 }
 
-.body-map-figure-strip {
-  position: absolute;
-  inset: 18px;
-  display: grid;
-  grid-template-columns: 0.26fr 0.48fr 0.26fr;
-  align-items: end;
-  gap: 10px;
-  pointer-events: none;
-}
-
-.body-map-figure {
+.body-map-image {
   width: 100%;
-  max-height: 100%;
+  height: 100%;
   object-fit: contain;
-  align-self: end;
+  object-position: center;
   user-select: none;
-}
-
-.body-map-figure-side-mirrored {
-  transform: scaleX(-1);
+  pointer-events: none;
 }
 
 .body-map-mark {
