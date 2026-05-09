@@ -15,6 +15,11 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "Physio",
   description: "Clinical records platform for physiotherapy practices.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
