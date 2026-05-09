@@ -755,6 +755,14 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     values={cervicalQuestions}
                   />
                 </div>
+                <div className="note-form-grid note-form-grid-single">
+                  <NoteTextarea
+                    label="Red flag / symptom details"
+                    name="special_questions.details"
+                    defaultValue={asString(specialQuestions.details)}
+                    rows={4}
+                  />
+                </div>
               </div>
             </details>
 
@@ -879,7 +887,7 @@ export function NoteView({ note, patient }: NoteViewProps) {
                     rows={4}
                   />
                   <NoteTextarea
-                    label="Further details"
+                    label="Past condition details"
                     name="medical_history.past_medical_history_details"
                     defaultValue={
                       asString(medicalHistory.past_medical_history_details) || (patient.past_medical_history_details ?? "")

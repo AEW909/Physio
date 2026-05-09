@@ -21,7 +21,7 @@ export async function getAppointment(appointmentId: string) {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("appointments")
-    .select("id, patient_id, treatment_plan_id, scheduled_at, appointment_type, status, location, clinician_id, created_at, updated_at")
+    .select("id, patient_id, treatment_plan_id, scheduled_at, appointment_type, status, location, clinician_id, is_archived, archived_at, archived_by, created_at, updated_at")
     .eq("id", appointmentId)
     .maybeSingle();
 

@@ -123,6 +123,7 @@ export function createInitialAssessmentContent() {
       tsp_pain: false,
       malaise: false,
       symptoms_worsening: false,
+      details: "",
     },
     cervical_questions: {
       face_lips_tongue: false,

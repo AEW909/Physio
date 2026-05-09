@@ -249,6 +249,7 @@ function buildNoteContent(noteType: NoteType, formData: FormData) {
         tsp_pain: getBoolean(formData, "special_questions.tsp_pain"),
         malaise: getBoolean(formData, "special_questions.malaise"),
         symptoms_worsening: getBoolean(formData, "special_questions.symptoms_worsening"),
+        details: getValue(formData, "special_questions.details"),
       },
       cervical_questions: {
         face_lips_tongue: getBoolean(formData, "cervical_questions.face_lips_tongue"),

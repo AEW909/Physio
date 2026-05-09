@@ -373,6 +373,8 @@ a {
   border-radius: 16px;
   background: var(--surface-strong);
   color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  line-height: 1.5;
   padding: 14px 16px;
 }
 
@@ -387,6 +389,8 @@ a {
   background-position: center, right 14px center;
   background-size: auto, 14px 9px;
   color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  line-height: 1.5;
   padding: 14px 42px 14px 16px;
 }
 
@@ -395,6 +399,8 @@ a {
   border-radius: 16px;
   background: var(--surface-strong);
   color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  line-height: 1.6;
   padding: 14px 16px;
   min-height: 96px;
   resize: vertical;
@@ -1149,6 +1155,8 @@ a {
 .note-form input,
 .note-form textarea,
 .note-form .select-field {
+  font-family: var(--font-body), sans-serif;
+  line-height: 1.55;
   padding: 11px 13px;
   font-size: 0.92rem;
 }
